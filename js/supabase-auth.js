@@ -29,6 +29,17 @@ const DEFAULT_MISSIONS = [
     href: "mission-002/index.html",
     sort_order: 2,
   },
+  {
+    id: "M03",
+    title: "The Network Intruder",
+    category: "Networking & Network Investigation",
+    difficulty: "Intermediate",
+    points: 100,
+    week: 2,
+    active: false,
+    href: "mission-003/index.html",
+    sort_order: 3,
+  },
 ];
 
 let _client = null;
