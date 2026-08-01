@@ -4,12 +4,14 @@ export default function InvestigationToolkit({
   evidence,
   openedEvidence,
   verifiedFlags,
+  totalFlags = 5,
   notebook,
   onNotebook,
   hintsUsed,
   maxHints,
   onHint,
   activeHint,
+  extra,
 }) {
   function formatTime(sec) {
     const s = Math.max(0, sec);
@@ -45,7 +47,7 @@ export default function InvestigationToolkit({
 
       <div className="tool-block">
         <div className="mono dim label">Flags recovered</div>
-        <div className="mono">{verifiedFlags}/5</div>
+        <div className="mono">{verifiedFlags}/{totalFlags}</div>
       </div>
 
       <div className="tool-block">
@@ -58,6 +60,8 @@ export default function InvestigationToolkit({
         </button>
         {activeHint ? <p className="hint-box">{activeHint}</p> : null}
       </div>
+
+      {extra ? <div className="tool-block">{extra}</div> : null}
 
       <div className="tool-block">
         <div className="mono dim label">Notebook</div>

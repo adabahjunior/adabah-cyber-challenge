@@ -117,6 +117,12 @@
         { icon: "◈", name: "Phishing Trap", on: (user.completed || []).includes("M01") },
         { icon: "🕵", name: "Hidden Trail", on: (user.completed || []).includes("M02") },
         { icon: "🌐", name: "Network Intruder", on: (user.completed || []).includes("M03") },
+        { icon: "🔐", name: "Breached Vault", on: (user.completed || []).includes("M04") },
+        { icon: "🌍", name: "Hidden Website", on: (user.completed || []).includes("M05") },
+        { icon: "🚨", name: "Blackout Part I", on: (user.completed || []).includes("M06") },
+        { icon: "🛡️", name: "Blackout Part II", on: (user.completed || []).includes("M07") },
+        { icon: "🦠", name: "Blackout Part III", on: (user.completed || []).includes("M08") },
+        { icon: "🏆", name: "Cyber Champion", on: (user.completed || []).includes("M09") },
         { icon: "♛", name: "Top 10", on: myRank !== null && myRank <= 10 },
       ];
       document.getElementById("achievements").innerHTML = achievements.map((a) => `
@@ -125,7 +131,7 @@
           <div class="mono" style="font-size:.8rem">${a.name}</div>
         </div>`).join("");
 
-      const names = { M01: "The Phishing Trap", M02: "The Hidden Trail", M03: "The Network Intruder" };
+      const names = { M01: "The Phishing Trap", M02: "The Hidden Trail", M03: "The Network Intruder", M04: "The Breached Vault", M05: "The Hidden Website", M06: "Operation Blackout – Part I", M07: "Operation Blackout – Part II", M08: "Operation Blackout – Part III", M09: "Operation Blackout – Final" };
       const list = document.getElementById("completedList");
       list.innerHTML = "";
       (user.completed || []).forEach((id) => {

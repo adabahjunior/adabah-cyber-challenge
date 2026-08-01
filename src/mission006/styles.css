@@ -1,0 +1,65 @@
+.mission-006 .status-chip {
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.mission-006 .priority-alert {
+  background:
+    radial-gradient(ellipse at top left, rgba(176, 0, 32, 0.18), transparent 50%),
+    #070707;
+  border-color: rgba(224, 17, 54, 0.45);
+}
+
+.mission-006 .evidence-grid.five {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.mission-006 .evidence-stage {
+  background:
+    radial-gradient(ellipse at top right, rgba(176, 0, 32, 0.12), transparent 45%),
+    #070707;
+}
+
+.mission-006 .continued-card {
+  margin-top: 1.15rem;
+  padding: 1.1rem 1.15rem;
+  border-radius: 12px;
+  border: 1px solid rgba(224, 17, 54, 0.45);
+  background: linear-gradient(135deg, rgba(176, 0, 32, 0.16), rgba(0, 0, 0, 0.4));
+}
+
+.mission-006 .continued-card h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  margin: 0.35rem 0 0.55rem;
+  color: var(--red-bright);
+}
+
+.complete-overlay.blackout .continued {
+  margin-top: 1rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  color: #fecaca;
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.toolkit-wrap {
+  position: sticky;
+  top: 1rem;
+}
+
+@media (max-width: 960px) {
+  .toolkit-wrap {
+    position: static;
+  }
+}

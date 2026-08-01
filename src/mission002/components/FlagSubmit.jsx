@@ -1,6 +1,15 @@
 import { useState } from "react";
 
-export default function FlagSubmit({ flagDef, verified, disabled, onVerify }) {
+export default function FlagSubmit({
+  flagDef,
+  verified,
+  disabled,
+  onVerify,
+  okLabel = "✔ Flag Accepted",
+  badLabel = "✖ Invalid Flag",
+  buttonLabel = "Verify Flag",
+  placeholder = "ACC{...}",
+}) {
   const [value, setValue] = useState("");
   const [status, setStatus] = useState(verified ? "ok" : "");
 
@@ -32,17 +41,17 @@ export default function FlagSubmit({ flagDef, verified, disabled, onVerify }) {
             setValue(e.target.value);
             setStatus("");
           }}
-          placeholder="ACC{...}"
+          placeholder={placeholder}
           disabled={disabled || verified}
           autoComplete="off"
           spellCheck={false}
         />
         <button className="btn btn-primary" type="submit" disabled={disabled || verified}>
-          Verify Flag
+          {buttonLabel}
         </button>
       </div>
-      {status === "ok" ? <p className="ok-msg">✔ Correct Flag</p> : null}
-      {status === "bad" ? <p className="bad-msg">✖ Incorrect Flag</p> : null}
+      {status === "ok" ? <p className="ok-msg">{okLabel}</p> : null}
+      {status === "bad" ? <p className="bad-msg">{badLabel}</p> : null}
       <style>{`
         .flag-box { padding:1.05rem 1.1rem; }
         .flag-row { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:.85rem; }

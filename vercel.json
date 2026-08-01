@@ -9,6 +9,18 @@
     { "source": "/mission-002", "destination": "/mission-002/index.html" },
     { "source": "/mission-002/", "destination": "/mission-002/index.html" },
     { "source": "/mission-003", "destination": "/mission-003/index.html" },
-    { "source": "/mission-003/", "destination": "/mission-003/index.html" }
+    { "source": "/mission-003/", "destination": "/mission-003/index.html" },
+    { "source": "/mission-004", "destination": "/mission-004/index.html" },
+    { "source": "/mission-004/", "destination": "/mission-004/index.html" },
+    { "source": "/mission-005", "destination": "/mission-005/index.html" },
+    { "source": "/mission-005/", "destination": "/mission-005/index.html" },
+    { "source": "/mission-006", "destination": "/mission-006/index.html" },
+    { "source": "/mission-006/", "destination": "/mission-006/index.html" },
+    { "source": "/mission-007", "destination": "/mission-007/index.html" },
+    { "source": "/mission-007/", "destination": "/mission-007/index.html" },
+    { "source": "/mission-008", "destination": "/mission-008/index.html" },
+    { "source": "/mission-008/", "destination": "/mission-008/index.html" },
+    { "source": "/mission-009", "destination": "/mission-009/index.html" },
+    { "source": "/mission-009/", "destination": "/mission-009/index.html" }
   ]
 }
