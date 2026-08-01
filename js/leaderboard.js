@@ -63,7 +63,7 @@
       <td class="rank">#${String(row.rank).padStart(2, "0")}</td>
       <td><span class="user-chip">${avatar}<span class="mono">${row.user}${row.self ? " (you)" : ""}</span></span></td>
       <td class="mono">${row.score.toLocaleString()}</td>
-      <td class="mono">${row.missions}/10</td>
+      <td class="mono">${row.missions}</td>
       <td><span class="badge badge-red">${row.badge}</span></td>`;
       tbody.appendChild(tr);
     });

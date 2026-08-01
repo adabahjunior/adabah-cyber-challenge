@@ -6,6 +6,20 @@ const SUPABASE_ANON_KEY =
 
 const ADMIN_EMAIL = "adabahjunior@gmail.com";
 
+const DEFAULT_MISSIONS = [
+  {
+    id: "M01",
+    title: "The Phishing Trap",
+    category: "Social Engineering",
+    difficulty: "Beginner",
+    points: 100,
+    week: 1,
+    active: true,
+    href: "mission-001/index.html",
+    sort_order: 1,
+  },
+];
+
 let _client = null;
 
 async function loadSdk() {
@@ -137,6 +151,97 @@ function rankParticipants(rows) {
 async function listLeaderboard() {
   const rows = await listParticipants();
   return rankParticipants(rows);
+}
+
+function normalizeMission(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category || "General",
+    difficulty: row.difficulty || "Beginner",
+    points: Number(row.points || 0),
+    week: Number(row.week || 1),
+    active: Boolean(row.active),
+    href: row.href || "mission-001/index.html",
+    sort_order: Number(row.sort_order || 100),
+  };
+}
+
+async function listMissions({ includeInactive = false } = {}) {
+  const supabase = await getClient();
+  let query = supabase
+    .from("acc_missions")
+    .select("id, title, category, difficulty, points, week, active, href, sort_order")
+    .order("week", { ascending: true })
+    .order("sort_order", { ascending: true });
+  if (!includeInactive) query = query.eq("active", true);
+  const { data, error } = await query;
+  if (error) {
+    // Table may not exist yet — fall back to Mission 001 only
+    console.warn("acc_missions unavailable, using default catalog", error.message);
+    const rows = DEFAULT_MISSIONS.map(normalizeMission);
+    return includeInactive ? rows : rows.filter((m) => m.active);
+  }
+  if (!data?.length && includeInactive) {
+    // Seed default row for admin if empty
+    return DEFAULT_MISSIONS.map(normalizeMission);
+  }
+  return (data || []).map(normalizeMission);
+}
+
+async function listActiveMissions() {
+  return listMissions({ includeInactive: false });
+}
+
+async function updateMission(id, patch) {
+  if (!(await isAdmin())) throw new Error("Admin access required");
+  const supabase = await getClient();
+  const payload = {
+    ...patch,
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from("acc_missions")
+    .update(payload)
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) {
+    // Insert if missing (first-time seed)
+    const base = DEFAULT_MISSIONS.find((m) => m.id === id) || {
+      id,
+      title: id,
+      category: "General",
+      difficulty: "Beginner",
+      points: 100,
+      week: 1,
+      active: false,
+      href: "mission-001/index.html",
+      sort_order: 100,
+    };
+    const { data: inserted, error: insertErr } = await supabase
+      .from("acc_missions")
+      .upsert({ ...base, ...payload }, { onConflict: "id" })
+      .select("*")
+      .single();
+    if (insertErr) throw insertErr;
+    return normalizeMission(inserted);
+  }
+  return normalizeMission(data);
+}
+
+async function ensureDefaultMissions() {
+  if (!(await isAdmin())) return;
+  const supabase = await getClient();
+  const { error } = await supabase.from("acc_missions").upsert(
+    DEFAULT_MISSIONS.map((m) => ({
+      ...m,
+      updated_at: new Date().toISOString(),
+    })),
+    { onConflict: "id", ignoreDuplicates: true }
+  );
+  if (error) console.warn("Could not seed default missions", error.message);
 }
 
 async function downloadPortraitAsJpg(url, filename = "portrait.jpg") {
@@ -272,6 +377,11 @@ window.ACCAuth = {
   isAdminEmail,
   listParticipants,
   listLeaderboard,
+  listMissions,
+  listActiveMissions,
+  updateMission,
+  ensureDefaultMissions,
   downloadPortraitAsJpg,
   profileToLocal,
+  DEFAULT_MISSIONS,
 };

@@ -15,6 +15,7 @@ Premium cybersecurity competition frontend for **cybercc.adabah.com**.
 | Onboarding | `/onboarding.html` |
 | Login | `/login.html` |
 | Dashboard | `/dashboard.html` |
+| Challenges | `/challenges.html` |
 | Mission 001 | `/mission-001/` |
 | Leaderboard | `/leaderboard.html` |
 | Profile | `/profile.html` |

@@ -21,10 +21,6 @@
 
   document.getElementById("missionCreate")?.addEventListener("submit", (e) => {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    document.getElementById("missionMsg").textContent =
-      `Draft saved locally for ${fd.get("id")} “${fd.get("title")}”. Publishing to the live mission list is not enabled yet.`;
-    e.target.reset();
   });
 
   const drop = document.getElementById("dropzone");
@@ -134,6 +130,85 @@
     }
   }
 
+  function renderMissions(missions) {
+    const body = document.querySelector("#missionTable tbody");
+    if (!body) return;
+    body.innerHTML = "";
+    if (!missions.length) {
+      body.innerHTML = `<tr><td colspan="7" class="muted">No missions in catalog.</td></tr>`;
+      return;
+    }
+    missions.forEach((m) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="mono">${escapeHtml(m.id)}</td>
+        <td>
+          <div>${escapeHtml(m.title)}</div>
+          <div class="mono dim" style="font-size:.75rem">${escapeHtml(m.category)}</div>
+        </td>
+        <td>${escapeHtml(m.difficulty)}</td>
+        <td class="mono">${Number(m.points || 0)}</td>
+        <td>
+          <select class="acc-native-select" data-mission-week="${escapeHtml(m.id)}" aria-label="Week for ${escapeHtml(m.id)}">
+            <option value="1" ${Number(m.week) === 1 ? "selected" : ""}>Week 1</option>
+            <option value="2" ${Number(m.week) === 2 ? "selected" : ""}>Week 2</option>
+            <option value="3" ${Number(m.week) === 3 ? "selected" : ""}>Week 3</option>
+          </select>
+        </td>
+        <td>
+          <span class="badge ${m.active ? "badge-green" : "badge-locked"}">${m.active ? "Active" : "Inactive"}</span>
+        </td>
+        <td>
+          <button class="btn ${m.active ? "btn-ghost" : "btn-primary"} btn-sm" type="button" data-mission-toggle="${escapeHtml(m.id)}" data-active="${m.active ? "1" : "0"}">
+            ${m.active ? "Deactivate" : "Activate"}
+          </button>
+        </td>`;
+      body.appendChild(tr);
+    });
+  }
+
+  async function refreshMissions() {
+    await ACCAuth.ensureDefaultMissions().catch(() => {});
+    const missions = await ACCAuth.listMissions({ includeInactive: true });
+    renderMissions(missions);
+    const live = missions.filter((m) => m.active).length;
+    document.getElementById("statLiveMissions").textContent = String(live);
+    return missions;
+  }
+
+  document.getElementById("missionTable")?.addEventListener("change", async (e) => {
+    const select = e.target.closest("[data-mission-week]");
+    if (!select) return;
+    const id = select.dataset.missionWeek;
+    const week = Number(select.value);
+    const msg = document.getElementById("missionMsg");
+    try {
+      await ACCAuth.updateMission(id, { week });
+      msg.textContent = `${id} moved to Week ${week}.`;
+      await refreshMissions();
+    } catch (err) {
+      msg.textContent = err.message || "Could not update week.";
+      await refreshMissions();
+    }
+  });
+
+  document.getElementById("missionTable")?.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-mission-toggle]");
+    if (!btn) return;
+    const id = btn.dataset.missionToggle;
+    const currentlyActive = btn.dataset.active === "1";
+    const msg = document.getElementById("missionMsg");
+    btn.disabled = true;
+    try {
+      await ACCAuth.updateMission(id, { active: !currentlyActive });
+      msg.textContent = `${id} is now ${currentlyActive ? "inactive" : "active"} for students.`;
+      await refreshMissions();
+    } catch (err) {
+      msg.textContent = err.message || "Could not update mission status.";
+      btn.disabled = false;
+    }
+  });
+
   document.getElementById("participantTable")?.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-download-portrait]");
     if (!btn || btn.disabled) return;
@@ -170,11 +245,11 @@
     document.getElementById("statParticipants").textContent = rows.length.toLocaleString();
     document.getElementById("statPhotos").textContent = withPhotos.toLocaleString();
     document.getElementById("statCleared").textContent = cleared.toLocaleString();
-    document.getElementById("statLiveMissions").textContent = "1";
 
     renderParticipants(rows);
     renderLeaderboard(rows);
     renderSubmissionsEmpty();
+    await refreshMissions();
   })().catch((err) => {
     console.error(err);
     location.href = "dashboard.html";

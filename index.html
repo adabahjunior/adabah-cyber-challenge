@@ -72,7 +72,7 @@
         </div>
         <div class="glass panel stat-card">
           <div class="label">Challenges</div>
-          <div class="value">10</div>
+          <div class="value" id="statChallenges">1</div>
         </div>
         <div class="glass panel stat-card">
           <div class="label">Tasks finished</div>
@@ -148,8 +148,13 @@
       } catch (err) {
         console.warn(err);
       }
+      let liveMissions = 1;
+      try {
+        liveMissions = (await ACCAuth.listActiveMissions()).length;
+      } catch (_) {}
       document.getElementById("statJoined").textContent = joined.toLocaleString();
       document.getElementById("statCleared").textContent = cleared.toLocaleString();
+      document.getElementById("statChallenges").textContent = String(liveMissions);
       ACC.typeTerminal(document.getElementById("heroTerminal"), [
         "$ checking challenge status",
         "OK season 1 is open",

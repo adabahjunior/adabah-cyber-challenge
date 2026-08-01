@@ -98,7 +98,7 @@
       document.getElementById("pMeta").textContent = `${user.fullName || "Student"} · ${user.department || "ACC"} · ${user.level}${user.whatsapp ? " · WhatsApp " + user.whatsapp : ""}`;
       document.getElementById("pRank").textContent = user.rank ? `Rank #${user.rank}` : "Rank —";
       document.getElementById("pScore").textContent = (user.score || 0).toLocaleString();
-      document.getElementById("pMissions").textContent = `${user.completed?.length || 0}/10`;
+      document.getElementById("pMissions").textContent = `${user.completed?.length || 0}`;
       document.getElementById("pWarn").textContent = `${user.warnings || 0}/3`;
       document.getElementById("pProg").textContent = `${user.progress || 0}%`;
 
@@ -115,16 +115,15 @@
       const achievements = [
         { icon: "⚑", name: "First win", on: (user.completed || []).length > 0 },
         { icon: "◈", name: "Phishing Trap", on: (user.completed || []).includes("M01") },
-        { icon: "♟", name: "Footprint Analysis", on: (user.completed || []).includes("M02") },
         { icon: "♛", name: "Top 10", on: myRank !== null && myRank <= 10 },
-      ].filter((a) => a.on || ["First win", "Phishing Trap"].includes(a.name));
+      ];
       document.getElementById("achievements").innerHTML = achievements.map((a) => `
         <div class="achievement ${a.on ? "" : "locked"}">
           <div class="icon">${a.icon}</div>
           <div class="mono" style="font-size:.8rem">${a.name}</div>
         </div>`).join("");
 
-      const names = { M01: "The Phishing Trap", M02: "Footprint Analysis" };
+      const names = { M01: "The Phishing Trap" };
       const list = document.getElementById("completedList");
       list.innerHTML = "";
       (user.completed || []).forEach((id) => {

@@ -150,24 +150,19 @@
     return "Recruit";
   }
 
-  const MISSIONS = {
-    1: [
-      { id: "M01", title: "The Phishing Trap", diff: "Beginner", pts: 100, status: "available", href: "mission-001/index.html" },
-      { id: "M02", title: "Footprint Analysis", diff: "Easy", pts: 150, status: "available" },
-      { id: "M03", title: "Password Fortress", diff: "Medium", pts: 200, status: "locked" },
-      { id: "M04", title: "Inbox Intrusion", diff: "Medium", pts: 250, status: "locked" },
-    ],
-    2: [
-      { id: "M05", title: "Web Intrusion", diff: "Medium", pts: 300, status: "locked" },
-      { id: "M06", title: "SQL Shadow", diff: "Hard", pts: 400, status: "locked" },
-      { id: "M07", title: "Privilege Escalation", diff: "Hard", pts: 450, status: "locked" },
-    ],
-    3: [
-      { id: "M08", title: "Network Breach", diff: "Hard", pts: 500, status: "locked" },
-      { id: "M09", title: "Blue Team Defense", diff: "Insane", pts: 600, status: "locked" },
-      { id: "M10", title: "Final Operation", diff: "Insane", pts: 800, status: "locked" },
-    ],
-  };
+  const MISSION_CATALOG = [
+    {
+      id: "M01",
+      title: "The Phishing Trap",
+      category: "Social Engineering",
+      difficulty: "Beginner",
+      points: 100,
+      week: 1,
+      active: true,
+      href: "mission-001/index.html",
+      sort_order: 1,
+    },
+  ];
 
   window.ACC = {
     loadUser,
@@ -180,7 +175,7 @@
     startCountdown,
     typeTerminal,
     badgeFor,
-    MISSIONS,
+    MISSION_CATALOG,
   };
 
   document.addEventListener("DOMContentLoaded", () => {

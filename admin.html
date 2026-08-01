@@ -41,8 +41,8 @@
 
         <div class="admin-tabs" id="adminTabs">
           <button class="admin-tab active" type="button" data-panel="participants">Participants</button>
+          <button class="admin-tab" type="button" data-panel="missions">Missions</button>
           <button class="admin-tab" type="button" data-panel="leaderboard">Leaderboard</button>
-          <button class="admin-tab" type="button" data-panel="missions">Create Missions</button>
           <button class="admin-tab" type="button" data-panel="files">Upload Files</button>
           <button class="admin-tab" type="button" data-panel="submissions">Submissions</button>
         </div>
@@ -87,22 +87,25 @@
         </section>
 
         <section class="admin-panel glass panel-lg" data-panel="missions" hidden>
-          <p class="eyebrow">New Mission</p>
-          <form id="missionCreate" class="stack" style="margin-top:1rem">
-            <div class="grid-2">
-              <div class="field"><label>Title</label><input name="title" placeholder="Web Intrusion" required></div>
-              <div class="field"><label>Mission ID</label><input name="id" placeholder="M05" required></div>
-            </div>
-            <div class="grid-3">
-              <div class="field"><label>Week</label><select name="week"><option>1</option><option>2</option><option>3</option></select></div>
-              <div class="field"><label>Difficulty</label><select name="diff"><option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option></select></div>
-              <div class="field"><label>Points</label><input name="pts" type="number" value="300"></div>
-            </div>
-            <div class="field"><label>Story</label><textarea name="story" placeholder="Mission narrative..."></textarea></div>
-            <div class="field"><label>Objectives (one per line)</label><textarea name="objectives" placeholder="Enumerate targets&#10;Capture flag"></textarea></div>
-            <button class="btn btn-primary" type="submit">Save draft</button>
-            <p class="field-hint" id="missionMsg"></p>
-          </form>
+          <p class="eyebrow">Mission control</p>
+          <p class="muted" style="margin:.5rem 0 0">Activate or deactivate missions and assign the week students should complete them. Only active missions appear on the student dashboard and challenges page.</p>
+          <p class="field-hint" id="missionMsg" style="margin-top:.75rem"></p>
+          <div class="admin-table-wrap" style="margin-top:1rem">
+            <table class="rank-table" id="missionTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Difficulty</th>
+                  <th>Points</th>
+                  <th>Week</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </section>
 
         <section class="admin-panel glass panel-lg" data-panel="files" hidden>

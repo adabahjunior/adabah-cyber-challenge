@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Challenges | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="/assets/logo.svg">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="dashboard.html"><span class="brand-mark">ACC</span> ADABAH <span class="acc">Cyber Challenge</span></a>
+        <nav class="nav-links" data-nav-links>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="challenges.html">Challenges</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="profile.html">Profile</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="container-fluid" style="width:min(100%,1100px)">
+        <div class="page-title">
+          <div>
+            <p class="eyebrow">Season 1</p>
+            <h1>Challenges</h1>
+            <p class="muted" style="margin-top:.5rem;max-width:52ch">Complete the active missions for each week. Your admin controls which missions are live and which week they belong to.</p>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="dashboard.html">← Dashboard</a>
+        </div>
+
+        <div id="challengeWeeks" class="stack" style="gap:1.75rem"></div>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="/js/core.js"></script>
+  <script type="module" src="/js/supabase-auth.js"></script>
+  <script type="module" src="/js/challenges.js"></script>
+</body>
+</html>
