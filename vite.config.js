@@ -28,6 +28,7 @@ export default defineConfig({
         mission008: resolve(__dirname, "mission-008/index.html"),
         mission009: resolve(__dirname, "mission-009/index.html"),
         challenges: resolve(__dirname, "challenges.html"),
+        results: resolve(__dirname, "results.html"),
       },
     },
   },

@@ -6,6 +6,7 @@ import SubmissionPanel from "./components/SubmissionPanel";
 import ScoreDisplay from "./components/ScoreDisplay";
 import DebriefCard from "./components/DebriefCard";
 import { MISSION_001 } from "./missions/mission001";
+import { syncMissionCompletion } from "./lib/syncCompletion";
 
 const STORAGE_KEY = "acc_mission_001_v1";
 
@@ -190,19 +191,12 @@ export default function App() {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 
-    // Mirror into ACC local profile if present
-    try {
-      const raw = localStorage.getItem("acc_participant_v1");
-      if (raw) {
-        const user = JSON.parse(raw);
-        if (!user.completed?.includes("M01")) {
-          user.completed = [...(user.completed || []), "M01"];
-          user.score = (user.score || 0) + score;
-          user.progress = Math.min(100, (user.progress || 0) + 10);
-          localStorage.setItem("acc_participant_v1", JSON.stringify(user));
-        }
-      }
-    } catch (_) {}
+    void syncMissionCompletion({
+      missionId: "M01",
+      score,
+      elapsed: Math.max(0, mission.timeLimitSec - remaining),
+      hintsUsed: 0,
+    });
   }
 
   return (

@@ -12,6 +12,7 @@ import SystemLogViewer from "./components/SystemLogViewer";
 import EmergencyEmail from "./components/EmergencyEmail";
 import TimelineBoard from "./components/TimelineBoard";
 import IncidentReport from "./components/IncidentReport";
+import { syncMissionCompletion } from "../mission/lib/syncCompletion";
 import "../mission/styles/mission.css";
 import "../mission002/styles.css";
 import "./styles.css";
@@ -188,18 +189,12 @@ export default function App() {
     setShowCompleteAnim(true);
     setTimeout(() => setShowCompleteAnim(false), 5200);
 
-    try {
-      const raw = localStorage.getItem("acc_participant_v1");
-      if (raw) {
-        const user = JSON.parse(raw);
-        if (!user.completed?.includes("M06")) {
-          user.completed = [...(user.completed || []), "M06"];
-          user.score = (user.score || 0) + score;
-          user.progress = Math.min(100, (user.progress || 0) + 10);
-          localStorage.setItem("acc_participant_v1", JSON.stringify(user));
-        }
-      }
-    } catch (_) {}
+    void syncMissionCompletion({
+      missionId: "M06",
+      score,
+      elapsed,
+      hintsUsed,
+    });
   }
 
   const activeEv = mission.evidence.find((e) => e.id === activeEvidence);

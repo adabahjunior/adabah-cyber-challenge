@@ -6,6 +6,10 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
 
+  let allParticipants = [];
+  let allRuns = [];
+  let selectedCertId = null;
+
   const tabs = document.getElementById("adminTabs");
   const panels = [...document.querySelectorAll(".admin-panel")];
 
@@ -17,10 +21,6 @@
     panels.forEach((p) => {
       p.hidden = p.dataset.panel !== btn.dataset.panel;
     });
-  });
-
-  document.getElementById("missionCreate")?.addEventListener("submit", (e) => {
-    e.preventDefault();
   });
 
   const drop = document.getElementById("dropzone");
@@ -41,22 +41,6 @@
     });
   }
 
-  document.getElementById("recalcBtn")?.addEventListener("click", async () => {
-    const msg = document.getElementById("lbAdminMsg");
-    try {
-      const rows = await ACCAuth.listLeaderboard();
-      renderLeaderboard(rows);
-      msg.textContent = `Ranks refreshed from ${rows.length} registered participant${rows.length === 1 ? "" : "s"}.`;
-    } catch (err) {
-      msg.textContent = err.message || "Could not refresh ranks.";
-    }
-  });
-
-  document.getElementById("freezeBtn")?.addEventListener("click", () => {
-    document.getElementById("lbAdminMsg").textContent =
-      "Board freeze is not connected yet. Ranks currently always follow live scores.";
-  });
-
   function portraitCell(row) {
     if (row.portrait_url) {
       return `<img class="admin-portrait" src="${escapeHtml(row.portrait_url)}" alt="${escapeHtml(row.full_name || row.handle)}">`;
@@ -64,18 +48,32 @@
     return `<span class="avatar">${escapeHtml(ACC.initials(row.full_name || row.handle))}</span>`;
   }
 
-  function renderParticipants(rows) {
+  function filteredParticipants() {
+    const q = (document.getElementById("participantSearch")?.value || "").toLowerCase().trim();
+    const dept = document.getElementById("participantDeptFilter")?.value || "";
+    const status = document.getElementById("participantStatusFilter")?.value || "";
+    return allParticipants.filter((row) => {
+      const missions = row.missions || 0;
+      if (dept && row.department !== dept) return false;
+      if (status === "completed" && missions < 9) return false;
+      if (status === "active" && (missions < 1 || missions >= 9)) return false;
+      if (status === "new" && missions > 0) return false;
+      if (!q) return true;
+      const hay = `${row.full_name || ""} ${row.handle || ""} ${row.email || ""} ${row.username || ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  function renderParticipants() {
+    const rows = filteredParticipants();
     const pt = document.querySelector("#participantTable tbody");
     pt.innerHTML = "";
     if (!rows.length) {
-      pt.innerHTML = `<tr><td colspan="8" class="muted">No registered participants yet.</td></tr>`;
+      pt.innerHTML = `<tr><td colspan="10" class="muted">No matching participants.</td></tr>`;
       return;
     }
     rows.forEach((row) => {
       const tr = document.createElement("tr");
-      const joined = row.onboarded_at
-        ? new Date(row.onboarded_at).toLocaleDateString()
-        : "—";
       const canDownload = Boolean(row.portrait_url);
       tr.innerHTML = `
         <td>${portraitCell(row)}</td>
@@ -85,17 +83,18 @@
         </td>
         <td class="mono">${escapeHtml(row.handle)}</td>
         <td>${escapeHtml(row.department || "—")}</td>
-        <td>${escapeHtml(row.level || "—")}</td>
-        <td class="mono">${escapeHtml(row.whatsapp || "—")}</td>
+        <td class="mono">#${row.computed_rank || "—"}</td>
         <td class="mono">${Number(row.score || 0).toLocaleString()}</td>
+        <td class="mono">${row.missions || 0}/9</td>
+        <td class="mono dim">${row.certificate_id ? "Issued" : "—"}</td>
         <td>
           <button class="btn btn-ghost btn-sm" type="button" data-download-portrait ${canDownload ? "" : "disabled"}
             data-url="${escapeHtml(row.portrait_url || "")}"
             data-name="${escapeHtml((row.handle || row.username || row.id || "participant") + "-portrait")}">
-            ${canDownload ? "Download JPG" : "No photo"}
+            ${canDownload ? "JPG" : "No photo"}
           </button>
         </td>
-        <td class="mono dim">${joined}</td>`;
+        <td><button class="btn btn-ghost btn-sm" type="button" data-open-dossier="${escapeHtml(row.id)}">Open</button></td>`;
       pt.appendChild(tr);
     });
   }
@@ -103,12 +102,9 @@
   function renderLeaderboard(rows) {
     const adminLb = document.getElementById("adminLb");
     adminLb.innerHTML = "";
-    if (!rows.length) {
-      adminLb.innerHTML = `<tr><td colspan="4" class="muted">No scores yet.</td></tr>`;
-      return;
-    }
-    rows.forEach((row) => {
+    rows.slice(0, 25).forEach((row) => {
       const tr = document.createElement("tr");
+      if (row.computed_rank <= 3) tr.classList.add("top");
       tr.innerHTML = `
         <td class="rank">#${row.computed_rank}</td>
         <td>
@@ -118,16 +114,10 @@
           </span>
         </td>
         <td class="mono">${Number(row.score || 0).toLocaleString()}</td>
+        <td class="mono">${row.missions || 0}/9</td>
         <td><span class="badge badge-red">${escapeHtml(row.badge)}</span></td>`;
       adminLb.appendChild(tr);
     });
-  }
-
-  function renderSubmissionsEmpty() {
-    const st = document.querySelector("#subTable tbody");
-    if (st) {
-      st.innerHTML = `<tr><td colspan="6" class="muted">No flag submissions stored yet.</td></tr>`;
-    }
   }
 
   function renderMissions(missions) {
@@ -177,14 +167,163 @@
     renderMissions(missions);
     const live = missions.filter((m) => m.active).length;
     document.getElementById("statLiveMissions").textContent = String(live);
-    if (msg && missions.length < 9) {
-      msg.textContent =
-        `Catalog shows ${missions.length}/9 missions. If rows are missing, run the latest Supabase migration (expand weeks + seed M04–M09), then refresh.`;
-    } else if (msg && !msg.textContent) {
-      msg.textContent = `Mission catalog synced · ${missions.length} missions.`;
-    }
+    if (msg) msg.textContent = `Mission catalog synced · ${missions.length} missions.`;
     return missions;
   }
+
+  function renderOverview(stats) {
+    const feed = document.getElementById("activityFeed");
+    if (!stats.activity?.length) {
+      feed.textContent = "No live activity yet.";
+    } else {
+      feed.innerHTML = stats.activity
+        .map((a) => {
+          const t = new Date(a.created_at).toLocaleTimeString();
+          return `<div><span class="dim">${t}</span> · ${escapeHtml(a.message)}</div>`;
+        })
+        .join("");
+    }
+
+    const byMission = {};
+    (stats.missions || []).forEach((m) => {
+      byMission[m.id] = { title: m.title, started: 0, done: 0, scoreSum: 0, timeSum: 0 };
+    });
+    (stats.runs || []).forEach((r) => {
+      if (!byMission[r.mission_id]) byMission[r.mission_id] = { title: r.mission_id, started: 0, done: 0, scoreSum: 0, timeSum: 0 };
+      byMission[r.mission_id].started += 1;
+      if (r.completed_at) {
+        byMission[r.mission_id].done += 1;
+        byMission[r.mission_id].scoreSum += Number(r.score || 0);
+        byMission[r.mission_id].timeSum += Number(r.elapsed_sec || 0);
+      }
+    });
+    const body = document.querySelector("#missionHealthTable tbody");
+    body.innerHTML = Object.entries(byMission)
+      .map(([id, m]) => {
+        const avgScore = m.done ? Math.round(m.scoreSum / m.done) : 0;
+        const avgTime = m.done ? ACC.formatDuration(Math.round(m.timeSum / m.done)) : "—";
+        return `<tr>
+          <td class="mono">${escapeHtml(id)}</td>
+          <td class="mono">${m.started}</td>
+          <td class="mono">${m.done}</td>
+          <td class="mono">${avgScore}</td>
+          <td class="mono">${avgTime}</td>
+        </tr>`;
+      })
+      .join("") || `<tr><td colspan="5" class="muted">No mission runs yet.</td></tr>`;
+
+    if (stats.competition?.status) {
+      document.getElementById("compStatusSelect").value = stats.competition.status;
+    }
+  }
+
+  function fillCertSelect(rows) {
+    const sel = document.getElementById("certParticipant");
+    if (!sel) return;
+    sel.innerHTML = rows
+      .map((r) => `<option value="${escapeHtml(r.id)}">#${r.computed_rank} · @${escapeHtml(r.handle)} · ${escapeHtml(r.full_name || "")}</option>`)
+      .join("");
+    selectedCertId = rows[0]?.id || null;
+  }
+
+  function currentCertParticipant() {
+    const id = document.getElementById("certParticipant")?.value || selectedCertId;
+    return allParticipants.find((p) => p.id === id);
+  }
+
+  function previewSelectedCert() {
+    const p = currentCertParticipant();
+    if (!p || !window.ACCComp) return;
+    ACCComp.previewCertificate(document.getElementById("certCanvas"), p, p.computed_rank);
+  }
+
+  document.getElementById("certPreviewBtn")?.addEventListener("click", previewSelectedCert);
+  document.getElementById("certJpgBtn")?.addEventListener("click", () => {
+    const p = currentCertParticipant();
+    if (!p) return;
+    ACCComp.downloadCertificateJpg({
+      fullName: p.full_name || p.handle,
+      username: p.handle,
+      achievement: ACCComp.awardTitleForRank(p.computed_rank, p.missions || 0),
+      rank: `#${p.computed_rank}`,
+      score: p.score || 0,
+      certId: p.certificate_id || `ACC-CERT-${p.handle}`.toUpperCase(),
+      template: ACCComp.certificateTemplate(p.computed_rank, p.missions || 0),
+      dateStr: new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }),
+    });
+  });
+  document.getElementById("certPdfBtn")?.addEventListener("click", () => {
+    const p = currentCertParticipant();
+    if (!p) return;
+    ACCComp.downloadCertificatePdf({
+      fullName: p.full_name || p.handle,
+      username: p.handle,
+      achievement: ACCComp.awardTitleForRank(p.computed_rank, p.missions || 0),
+      rank: `#${p.computed_rank}`,
+      score: p.score || 0,
+      certId: p.certificate_id || `ACC-CERT-${p.handle}`.toUpperCase(),
+      template: ACCComp.certificateTemplate(p.computed_rank, p.missions || 0),
+      dateStr: new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }),
+    });
+  });
+
+  document.getElementById("recalcBtn")?.addEventListener("click", async () => {
+    const msg = document.getElementById("lbAdminMsg");
+    try {
+      await ACCAuth.refreshAwards().catch(() => null);
+      const rows = await ACCAuth.listLeaderboard();
+      allParticipants = rows;
+      renderLeaderboard(rows);
+      renderParticipants();
+      msg.textContent = `Ranks refreshed from ${rows.length} participants.`;
+    } catch (err) {
+      msg.textContent = err.message || "Could not refresh ranks.";
+    }
+  });
+
+  document.getElementById("exportResultsBtn")?.addEventListener("click", () => {
+    const header = "rank,username,full_name,department,score,missions,time_sec,certificate_id\n";
+    const lines = allParticipants
+      .map(
+        (r) =>
+          `${r.computed_rank},${r.handle},"${(r.full_name || "").replace(/"/g, '""')}",${r.department || ""},${r.score || 0},${r.missions || 0},${r.total_time_sec || 0},${r.certificate_id || ""}`
+      )
+      .join("\n");
+    const blob = new Blob([header + lines], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "acc-final-results.csv";
+    a.click();
+  });
+
+  document.getElementById("compStatusSave")?.addEventListener("click", async () => {
+    const status = document.getElementById("compStatusSelect").value;
+    const msg = document.getElementById("overviewMsg");
+    try {
+      await ACCAuth.setCompetitionStatus(status);
+      msg.textContent = `Competition status set to ${status}.`;
+    } catch (err) {
+      msg.textContent = err.message || "Could not update status.";
+    }
+  });
+
+  document.getElementById("refreshAwardsBtn")?.addEventListener("click", async () => {
+    const msg = document.getElementById("overviewMsg");
+    try {
+      await ACCAuth.refreshAwards();
+      allParticipants = await ACCAuth.listLeaderboard();
+      renderParticipants();
+      fillCertSelect(allParticipants);
+      msg.textContent = "Awards recalculated from current standings.";
+    } catch (err) {
+      msg.textContent = err.message || "Could not refresh awards.";
+    }
+  });
+
+  ["participantSearch", "participantDeptFilter", "participantStatusFilter"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", renderParticipants);
+    document.getElementById(id)?.addEventListener("change", renderParticipants);
+  });
 
   document.getElementById("missionTable")?.addEventListener("change", async (e) => {
     const select = e.target.closest("[data-mission-week]");
@@ -220,27 +359,60 @@
   });
 
   document.getElementById("participantTable")?.addEventListener("click", async (e) => {
+    const dossier = e.target.closest("[data-open-dossier]");
+    if (dossier) {
+      const row = allParticipants.find((p) => p.id === dossier.dataset.openDossier);
+      const box = document.getElementById("participantDetail");
+      const body = document.getElementById("participantDetailBody");
+      if (!row) return;
+      box.hidden = false;
+      const runs = allRuns.filter((r) => r.user_id === row.id);
+      body.innerHTML = `
+        <div class="mono" style="margin-top:.5rem">${escapeHtml(row.full_name || "—")} · @${escapeHtml(row.handle)}</div>
+        <div class="muted">${escapeHtml(row.department || "—")} · Rank #${row.computed_rank} · ${Number(row.score || 0).toLocaleString()} XP</div>
+        <div class="muted" style="margin-top:.35rem">Hints: ${row.hints_used || 0} · Time: ${ACC.formatDuration(row.total_time_sec || 0)} · Cert: ${escapeHtml(row.certificate_id || "not issued")}</div>
+        <div class="muted" style="margin-top:.35rem">Awards: ${(row.awards || []).join(", ") || "none"}</div>
+        <div class="admin-table-wrap" style="margin-top:.75rem">
+          <table class="rank-table">
+            <thead><tr><th>Mission</th><th>Score</th><th>Time</th><th>Hints</th><th>Completed</th></tr></thead>
+            <tbody>
+              ${
+                runs
+                  .map(
+                    (r) => `<tr>
+                  <td class="mono">${escapeHtml(r.mission_id)}</td>
+                  <td class="mono">${r.score}</td>
+                  <td class="mono">${ACC.formatDuration(r.elapsed_sec || 0)}</td>
+                  <td class="mono">${r.hints_used || 0}</td>
+                  <td class="mono">${r.completed_at ? new Date(r.completed_at).toLocaleString() : "—"}</td>
+                </tr>`
+                  )
+                  .join("") || `<tr><td colspan="5" class="muted">No mission runs.</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>`;
+      return;
+    }
+
     const btn = e.target.closest("[data-download-portrait]");
     if (!btn || btn.disabled) return;
     const url = btn.dataset.url;
     const name = btn.dataset.name || "portrait";
     const original = btn.textContent;
     btn.disabled = true;
-    btn.textContent = "Preparing…";
+    btn.textContent = "…";
     try {
       await ACCAuth.downloadPortraitAsJpg(url, `${name}.jpg`);
-      btn.textContent = "Downloaded";
+      btn.textContent = "OK";
       setTimeout(() => {
         btn.textContent = original;
         btn.disabled = false;
-      }, 1200);
+      }, 1000);
     } catch (err) {
-      btn.textContent = "Failed";
       alert(err.message || "Could not download portrait as JPG.");
-      setTimeout(() => {
-        btn.textContent = original;
-        btn.disabled = false;
-      }, 1200);
+      btn.textContent = original;
+      btn.disabled = false;
     }
   });
 
@@ -251,12 +423,11 @@
     if (!status || !btn) return;
     try {
       const active = await ACCAuth.isAccessHoldActive();
-      status.textContent = active ? "ACTIVE — students held on waiting page" : "INACTIVE — students can enter the platform";
+      status.textContent = active ? "ACTIVE — students held on waiting page" : "INACTIVE — students can enter";
       status.style.color = active ? "var(--red-bright)" : "#86efac";
       btn.textContent = active ? "Deactivate gate" : "Activate gate";
       btn.dataset.active = active ? "1" : "0";
       btn.className = active ? "btn btn-ghost" : "btn btn-primary";
-      if (msg && !msg.dataset.locked) msg.textContent = "";
     } catch (err) {
       status.textContent = "Could not load gate status";
       if (msg) msg.textContent = err.message || "Error";
@@ -271,13 +442,9 @@
     try {
       await ACCAuth.setAccessHoldActive(!currentlyActive);
       if (msg) {
-        msg.dataset.locked = "1";
         msg.textContent = !currentlyActive
-          ? "Gate activated. New signups and student logins will see the WhatsApp waiting page."
-          : "Gate deactivated. Students can reach the dashboard and challenges again.";
-        setTimeout(() => {
-          delete msg.dataset.locked;
-        }, 50);
+          ? "Gate activated. Students will see the waiting page."
+          : "Gate deactivated. Students can enter again.";
       }
       await refreshAccessHold();
     } catch (err) {
@@ -291,17 +458,32 @@
     const gate = await ACCAuth.requireAdmin();
     if (!gate) return;
 
-    const rows = await ACCAuth.listLeaderboard();
-    const cleared = rows.reduce((sum, r) => sum + (r.missions || 0), 0);
-    const withPhotos = rows.filter((r) => r.portrait_url).length;
+    const stats = await ACCAuth.getCompetitionStats();
+    allParticipants = stats.board || [];
+    allRuns = stats.runs || [];
 
-    document.getElementById("statParticipants").textContent = rows.length.toLocaleString();
-    document.getElementById("statPhotos").textContent = withPhotos.toLocaleString();
-    document.getElementById("statCleared").textContent = cleared.toLocaleString();
+    document.getElementById("statParticipants").textContent = String(stats.totals.registered);
+    document.getElementById("statActiveDone").textContent = `${stats.totals.active} / ${stats.totals.completed}`;
+    document.getElementById("statAvgScore").textContent = String(stats.totals.avgScore);
+    document.getElementById("statCleared").textContent = String(stats.totals.totalMissionCompletions);
+    document.getElementById("statLeader").textContent = stats.totals.leader
+      ? `@${stats.totals.leader.handle}`
+      : "—";
 
-    renderParticipants(rows);
-    renderLeaderboard(rows);
-    renderSubmissionsEmpty();
+    const deptSel = document.getElementById("participantDeptFilter");
+    const depts = [...new Set(allParticipants.map((p) => p.department).filter(Boolean))].sort();
+    depts.forEach((d) => {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d;
+      deptSel.appendChild(opt);
+    });
+
+    renderParticipants();
+    renderLeaderboard(allParticipants);
+    renderOverview(stats);
+    fillCertSelect(allParticipants);
+    previewSelectedCert();
     await refreshMissions();
     await refreshAccessHold();
   })().catch((err) => {

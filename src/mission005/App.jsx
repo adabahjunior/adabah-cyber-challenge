@@ -11,6 +11,7 @@ import SourceViewer from "./components/SourceViewer";
 import ImageInspector from "./components/ImageInspector";
 import FinalAssessment from "./components/FinalAssessment";
 import WebsiteMap from "./components/WebsiteMap";
+import { syncMissionCompletion } from "../mission/lib/syncCompletion";
 import "../mission/styles/mission.css";
 import "../mission002/styles.css";
 import "./styles.css";
@@ -207,18 +208,12 @@ export default function App() {
     setShowCompleteAnim(true);
     setTimeout(() => setShowCompleteAnim(false), 4200);
 
-    try {
-      const raw = localStorage.getItem("acc_participant_v1");
-      if (raw) {
-        const user = JSON.parse(raw);
-        if (!user.completed?.includes("M05")) {
-          user.completed = [...(user.completed || []), "M05"];
-          user.score = (user.score || 0) + score;
-          user.progress = Math.min(100, (user.progress || 0) + 10);
-          localStorage.setItem("acc_participant_v1", JSON.stringify(user));
-        }
-      }
-    } catch (_) {}
+    void syncMissionCompletion({
+      missionId: "M05",
+      score,
+      elapsed,
+      hintsUsed,
+    });
   }
 
   const activeEv = mission.evidence.find((e) => e.id === activeEvidence);

@@ -21,6 +21,7 @@
     { "source": "/mission-008", "destination": "/mission-008/index.html" },
     { "source": "/mission-008/", "destination": "/mission-008/index.html" },
     { "source": "/mission-009", "destination": "/mission-009/index.html" },
-    { "source": "/mission-009/", "destination": "/mission-009/index.html" }
+    { "source": "/mission-009/", "destination": "/mission-009/index.html" },
+    { "source": "/results", "destination": "/results.html" }
   ]
 }

@@ -143,11 +143,21 @@
   }
 
   function badgeFor(score, missions) {
-    if (score >= 4000 || missions >= 9) return "Elite";
+    if (missions >= 9) return "Cyber Champion";
+    if (score >= 4000 || missions >= 8) return "Elite";
     if (score >= 3000 || missions >= 7) return "Pro";
     if (score >= 2000 || missions >= 5) return "Rising";
     if (score >= 500 || missions >= 2) return "Operative";
     return "Recruit";
+  }
+
+  function formatDuration(sec) {
+    const s = Math.max(0, Number(sec) || 0);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const r = s % 60;
+    if (h) return `${h}h ${m}m`;
+    return `${m}m ${String(r).padStart(2, "0")}s`;
   }
 
   const MISSION_CATALOG = [
@@ -263,6 +273,7 @@
     startCountdown,
     typeTerminal,
     badgeFor,
+    formatDuration,
     MISSION_CATALOG,
   };
 

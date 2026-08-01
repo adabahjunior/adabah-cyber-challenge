@@ -15,6 +15,7 @@ import EvidenceBoard from "./components/EvidenceBoard";
 import RecoveryChecklist from "./components/RecoveryChecklist";
 import FinalIncidentReport from "./components/FinalIncidentReport";
 import ChampionFinale from "./components/ChampionFinale";
+import { syncMissionCompletion } from "../mission/lib/syncCompletion";
 import "../mission/styles/mission.css";
 import "../mission002/styles.css";
 import "./styles.css";
@@ -202,19 +203,12 @@ export default function App() {
     setActiveEvidence(null);
     setShowFinale(true);
 
-    try {
-      const raw = localStorage.getItem("acc_participant_v1");
-      if (raw) {
-        const user = JSON.parse(raw);
-        if (!user.completed?.includes("M09")) {
-          user.completed = [...(user.completed || []), "M09"];
-          user.score = (user.score || 0) + score;
-          user.progress = 100;
-          user.badge = "ADABAH Cyber Champion";
-          localStorage.setItem("acc_participant_v1", JSON.stringify(user));
-        }
-      }
-    } catch (_) {}
+    void syncMissionCompletion({
+      missionId: "M09",
+      score,
+      elapsed,
+      hintsUsed,
+    });
   }
 
   const activeEv = mission.evidence.find((e) => e.id === activeEvidence);

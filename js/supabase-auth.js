@@ -183,6 +183,12 @@ function profileToLocal(profile, session) {
     progress: profile?.progress ?? 0,
     warnings: profile?.warnings ?? 0,
     completed: profile?.completed_missions || [],
+    totalTimeSec: profile?.total_time_sec ?? 0,
+    hintsUsed: profile?.hints_used ?? 0,
+    finalMissionScore: profile?.final_mission_score ?? 0,
+    competitionCompletedAt: profile?.competition_completed_at || null,
+    certificateId: profile?.certificate_id || null,
+    awards: profile?.awards || [],
     onboarded: Boolean(profile?.onboarded_at),
     isAdmin: isAdminEmail(profile?.email || session?.user?.email),
   };
@@ -214,13 +220,20 @@ async function requireAdmin() {
 
 async function listParticipants() {
   const supabase = await getClient();
+  const ranked = await supabase.rpc("acc_ranked_participants");
+  if (!ranked.error && ranked.data) {
+    return ranked.data;
+  }
   const { data, error } = await supabase
     .from("acc_profiles")
     .select(
-      "id, email, full_name, department, level, username, hacker_name, avatar, avatar_style, portrait_url, whatsapp, score, rank, progress, warnings, completed_missions, onboarded_at, created_at"
+      "id, email, full_name, department, level, username, hacker_name, avatar, avatar_style, portrait_url, whatsapp, score, rank, progress, warnings, completed_missions, total_time_sec, hints_used, final_mission_score, competition_completed_at, certificate_id, awards, onboarded_at, created_at"
     )
     .not("onboarded_at", "is", null)
     .order("score", { ascending: false })
+    .order("final_mission_score", { ascending: false })
+    .order("total_time_sec", { ascending: true })
+    .order("hints_used", { ascending: true })
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data || [];
@@ -229,16 +242,114 @@ async function listParticipants() {
 function rankParticipants(rows) {
   return (rows || []).map((row, index) => ({
     ...row,
-    computed_rank: index + 1,
+    computed_rank: Number(row.computed_rank || index + 1),
     handle: row.hacker_name || row.username || "student",
     missions: Array.isArray(row.completed_missions) ? row.completed_missions.length : 0,
     badge: ACC.badgeFor?.(row.score || 0, Array.isArray(row.completed_missions) ? row.completed_missions.length : 0) || "Recruit",
+    awardLabels: (row.awards || []).map((a) => (window.ACCComp?.AWARDS?.[a]?.title) || a),
   }));
 }
 
 async function listLeaderboard() {
   const rows = await listParticipants();
   return rankParticipants(rows);
+}
+
+async function recordMissionComplete({ missionId, score = 0, elapsedSec = 0, hintsUsed = 0 }) {
+  const supabase = await getClient();
+  const { data, error } = await supabase.rpc("acc_record_mission_complete", {
+    p_mission_id: missionId,
+    p_score: Number(score) || 0,
+    p_elapsed_sec: Number(elapsedSec) || 0,
+    p_hints_used: Number(hintsUsed) || 0,
+  });
+  if (error) throw error;
+  await syncLocalFromCloud().catch(() => null);
+  return data;
+}
+
+async function listActivity(limit = 40) {
+  const supabase = await getClient();
+  const { data, error } = await supabase
+    .from("acc_activity")
+    .select("id, user_id, event_type, message, meta, created_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
+async function listMissionRuns() {
+  const supabase = await getClient();
+  const { data, error } = await supabase
+    .from("acc_mission_runs")
+    .select("id, user_id, mission_id, score, elapsed_sec, hints_used, started_at, completed_at")
+    .order("completed_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+async function getCompetition() {
+  const supabase = await getClient();
+  const { data, error } = await supabase.from("acc_competition").select("*").eq("id", "season1").maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+async function setCompetitionStatus(status) {
+  if (!(await isAdmin())) throw new Error("Admin access required");
+  const supabase = await getClient();
+  const patch = { status, updated_at: new Date().toISOString() };
+  if (status === "active") patch.started_at = new Date().toISOString();
+  if (status === "completed") patch.ended_at = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("acc_competition")
+    .upsert({ id: "season1", title: "ADABAH Cyber Challenge · Season 1", ...patch }, { onConflict: "id" })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function refreshAwards() {
+  if (!(await isAdmin())) throw new Error("Admin access required");
+  const supabase = await getClient();
+  const { error } = await supabase.rpc("acc_refresh_awards");
+  if (error) throw error;
+  return true;
+}
+
+async function getCompetitionStats() {
+  const [board, runs, activity, missions, competition] = await Promise.all([
+    listLeaderboard(),
+    listMissionRuns().catch(() => []),
+    listActivity(30).catch(() => []),
+    listMissions({ includeInactive: true }).catch(() => []),
+    getCompetition().catch(() => null),
+  ]);
+  const completedParticipants = board.filter((b) => (b.missions || 0) >= 9).length;
+  const activeParticipants = board.filter((b) => (b.missions || 0) > 0 && (b.missions || 0) < 9).length;
+  const avgScore = board.length
+    ? Math.round(board.reduce((s, b) => s + Number(b.score || 0), 0) / board.length)
+    : 0;
+  const totalMissionCompletions = board.reduce((s, b) => s + Number(b.missions || 0), 0);
+  const avgCompletionRate = board.length ? Math.round((totalMissionCompletions / (board.length * 9)) * 100) : 0;
+  return {
+    board,
+    runs,
+    activity,
+    missions,
+    competition,
+    totals: {
+      registered: board.length,
+      active: activeParticipants,
+      completed: completedParticipants,
+      avgScore,
+      avgCompletionRate,
+      totalMissionCompletions,
+      leader: board[0] || null,
+    },
+  };
 }
 
 function normalizeMission(row) {
@@ -548,5 +659,12 @@ window.ACCAuth = {
   ensureDefaultMissions,
   downloadPortraitAsJpg,
   profileToLocal,
+  recordMissionComplete,
+  listActivity,
+  listMissionRuns,
+  getCompetition,
+  setCompetitionStatus,
+  refreshAwards,
+  getCompetitionStats,
   DEFAULT_MISSIONS,
 };

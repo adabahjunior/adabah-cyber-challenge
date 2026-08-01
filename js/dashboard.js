@@ -8,7 +8,19 @@
       el.hidden = !user.isAdmin;
     });
 
+    let meRank = user.rank || null;
+    try {
+      const board = await ACCAuth.listLeaderboard();
+      const me = board.find((r) => r.email && user.email && r.email.toLowerCase() === user.email.toLowerCase());
+      if (me) meRank = me.computed_rank;
+    } catch (_) {}
+
     const handle = user.hackerName || user.username || "student";
+    const completed = user.completed || [];
+    const cleared = completed.length;
+    const remaining = Math.max(0, 9 - cleared);
+    const pct = Math.min(100, Math.round((cleared / 9) * 100));
+
     const dashAvatar = document.getElementById("dashAvatar");
     if (user.portraitUrl) {
       dashAvatar.classList.add("has-photo");
@@ -19,31 +31,45 @@
     ACCAvatars.mount(document.getElementById("dashAnim"), user.avatarStyle || "pulse", "lg");
     document.getElementById("dashName").textContent = `@${handle}`;
     document.getElementById("dashMeta").textContent = `${user.level || "Beginner"} · ${user.department || "Student"}`;
-    document.getElementById("dashRank").textContent = user.rank ? `#${user.rank}` : "—";
+    document.getElementById("dashRank").textContent = meRank ? `#${meRank}` : "—";
     document.getElementById("dashScore").textContent = (user.score || 0).toLocaleString();
+    document.getElementById("dashCleared").textContent = `${cleared}/9`;
+    document.getElementById("dashRemaining").textContent = String(remaining);
+    document.getElementById("dashPct").textContent = `${pct}%`;
+    document.getElementById("dashTime").textContent = ACC.formatDuration?.(user.totalTimeSec || 0) || `${user.totalTimeSec || 0}s`;
+    document.getElementById("dashHints").textContent = String(user.hintsUsed || 0);
+    document.getElementById("dashProgress").style.width = `${pct}%`;
+    document.getElementById("dashProgressLabel").textContent = `${pct}%`;
+    document.getElementById("progressTitle").textContent = `${cleared}/9 Missions Completed`;
+
+    const awardsEl = document.getElementById("dashAwards");
+    const awards = user.awards || [];
+    if (awards.length && window.ACCComp) {
+      awardsEl.innerHTML = awards
+        .map((a) => {
+          const def = ACCComp.AWARDS[a];
+          return `<span class="badge badge-red">${def ? `${def.icon} ${def.title}` : a}</span>`;
+        })
+        .join("");
+    } else {
+      awardsEl.innerHTML = `<span class="badge">${ACC.badgeFor(user.score || 0, cleared)}</span>`;
+    }
 
     const activeMissions = await ACCAuth.listActiveMissions().catch(() => []);
-    const totalLive = activeMissions.length;
-    const clearedLive = activeMissions.filter((m) => (user.completed || []).includes(m.id)).length;
-    document.getElementById("dashCleared").textContent = `${clearedLive}/${totalLive || 0}`;
-    const progress = totalLive ? Math.round((clearedLive / totalLive) * 100) : 0;
-    document.getElementById("dashProgress").style.width = `${progress}%`;
-    document.getElementById("dashProgressLabel").textContent = `${progress}%`;
-
     const continueBtn = document.getElementById("continueChallenge");
     if (continueBtn) {
-      const next = activeMissions.find((m) => !(user.completed || []).includes(m.id)) || activeMissions[0];
+      const next = activeMissions.find((m) => !completed.includes(m.id)) || activeMissions[0];
       continueBtn.href = next?.href || "challenges.html";
-      continueBtn.textContent = next ? (clearedLive ? "Continue challenge" : "Start challenge") : "View challenges";
+      continueBtn.textContent = next ? (cleared ? "Continue mission" : "Start mission") : "View missions";
     }
 
     ACC.typeTerminal(document.getElementById("dashTerm"), [
       `$ hello ${handle}`,
-      `OK welcome back`,
-      `$ live missions`,
-      `OK ${totalLive} active this season`,
-      `$ fair play warnings`,
-      `OK ${user.warnings || 0} of 3_`,
+      `OK command center online`,
+      `$ status`,
+      `OK ${cleared}/9 missions · ${remaining} remaining`,
+      `$ cyber_xp`,
+      `OK ${(user.score || 0).toLocaleString()} XP_`,
     ], 12);
 
     const weekTabs = document.getElementById("weekTabs");
@@ -62,10 +88,7 @@
         return;
       }
       weekTabs.innerHTML = weeks
-        .map(
-          (w) =>
-            `<button class="week-tab ${w === week ? "active" : ""}" type="button" data-week="${w}">Week ${w}</button>`
-        )
+        .map((w) => `<button class="week-tab ${w === week ? "active" : ""}" type="button" data-week="${w}">Week ${w}</button>`)
         .join("");
     }
 
@@ -81,11 +104,10 @@
       }
       grid.innerHTML = list
         .map((m) => {
-          const done = (user.completed || []).includes(m.id);
-          const status = done ? "completed" : "available";
+          const done = completed.includes(m.id);
           return `
         <a class="glass mission-card" href="${m.href}">
-          <div class="meta">${statusBadge(status)}<span class="badge">${m.difficulty}</span></div>
+          <div class="meta">${statusBadge(done ? "completed" : "available")}<span class="badge">${m.difficulty}</span></div>
           <div class="title">${m.id} · ${m.title}</div>
           <p class="muted" style="font-size:.9rem">${m.category} · Week ${m.week}</p>
           <div class="footer">
@@ -131,11 +153,6 @@
           <td><span class="badge badge-red">${row.badge}</span></td>`;
           tbody.appendChild(tr);
         });
-
-        const me = board.find((r) => r.email && user.email && r.email.toLowerCase() === user.email.toLowerCase());
-        if (me) {
-          document.getElementById("dashRank").textContent = `#${me.computed_rank}`;
-        }
       }
     } catch (err) {
       console.error(err);

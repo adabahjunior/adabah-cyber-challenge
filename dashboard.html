@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Command Center | ADABAH Cyber Challenge</title>
+  <title>Cyber Command Center | ADABAH Cyber Challenge</title>
   <link rel="icon" href="/assets/logo.svg">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -16,8 +16,9 @@
       <div class="container">
         <a class="brand" href="index.html"><span class="brand-mark">ACC</span> ADABAH <span class="acc">Cyber Challenge</span></a>
         <nav class="nav-links" data-nav-links>
-          <a href="dashboard.html">Dashboard</a>
+          <a href="dashboard.html">Command Center</a>
           <a href="leaderboard.html">Leaderboard</a>
+          <a href="results.html">Results</a>
           <a href="profile.html">Profile</a>
           <a href="admin.html" data-admin-only hidden>Admin</a>
           <button class="btn btn-ghost btn-sm" type="button" id="signOutBtn">Sign out</button>
@@ -27,9 +28,10 @@
 
     <div class="app-shell">
       <aside class="side-rail">
-        <a class="active" href="dashboard.html">◈ Home</a>
-        <a href="challenges.html">⚔ Challenges</a>
+        <a class="active" href="dashboard.html">◈ Command</a>
+        <a href="challenges.html">⚔ Missions</a>
         <a href="leaderboard.html">▤ Leaderboard</a>
+        <a href="results.html">🏆 Results</a>
         <a href="profile.html">◎ Profile</a>
         <a href="admin.html" data-admin-only hidden>▣ Admin</a>
       </aside>
@@ -38,10 +40,11 @@
         <div class="container-fluid">
           <div class="page-title">
             <div>
-              <p class="eyebrow">Your home</p>
-              <h1>Dashboard</h1>
+              <p class="eyebrow">Participant experience</p>
+              <h1>ADABAH Cyber Command Center</h1>
+              <p class="muted" style="margin-top:.4rem">Track rank, Cyber XP, badges, and mission progress across the season.</p>
             </div>
-            <a class="btn btn-primary btn-sm" id="continueChallenge" href="challenges.html">Continue challenge</a>
+            <a class="btn btn-primary btn-sm" id="continueChallenge" href="challenges.html">Continue mission</a>
           </div>
 
           <div class="grid-2">
@@ -52,25 +55,28 @@
                 <div style="flex:1">
                   <div class="mono" style="font-size:1.1rem" id="dashName">@student</div>
                   <div class="muted" id="dashMeta">Beginner</div>
-                  <div style="margin-top:0.85rem">
-                    <div class="row" style="justify-content:space-between;margin-bottom:.35rem">
-                      <span class="mono dim" style="font-size:.75rem">SEASON PROGRESS</span>
-                      <span class="mono" id="dashProgressLabel">28%</span>
-                    </div>
-                    <div class="progress"><span id="dashProgress" style="width:28%"></span></div>
-                  </div>
+                  <div class="row" style="margin-top:.65rem;gap:.4rem;flex-wrap:wrap" id="dashAwards"></div>
                 </div>
               </div>
-              <div class="stat-grid" style="margin-top:1.25rem;grid-template-columns:repeat(3,1fr)">
-                <div><div class="label mono dim" style="font-size:.72rem">RANK</div><div class="value" style="font-size:1.4rem" id="dashRank">#14</div></div>
-                <div><div class="label mono dim" style="font-size:.72rem">SCORE</div><div class="value accent" style="font-size:1.4rem" id="dashScore">1250</div></div>
-                <div><div class="label mono dim" style="font-size:.72rem">CLEARED</div><div class="value" style="font-size:1.4rem" id="dashCleared">0/0</div></div>
+              <div class="stat-grid" style="margin-top:1.25rem;grid-template-columns:repeat(4,1fr)">
+                <div><div class="label mono dim" style="font-size:.72rem">RANK</div><div class="value" style="font-size:1.35rem" id="dashRank">#—</div></div>
+                <div><div class="label mono dim" style="font-size:.72rem">CYBER XP</div><div class="value accent" style="font-size:1.35rem" id="dashScore">0</div></div>
+                <div><div class="label mono dim" style="font-size:.72rem">COMPLETED</div><div class="value" style="font-size:1.35rem" id="dashCleared">0/9</div></div>
+                <div><div class="label mono dim" style="font-size:.72rem">REMAINING</div><div class="value" style="font-size:1.35rem" id="dashRemaining">9</div></div>
+              </div>
+              <div class="stat-grid" style="margin-top:.85rem;grid-template-columns:repeat(3,1fr)">
+                <div><div class="label mono dim" style="font-size:.72rem">COMPLETION</div><div class="value" style="font-size:1.1rem" id="dashPct">0%</div></div>
+                <div><div class="label mono dim" style="font-size:.72rem">TOTAL TIME</div><div class="value" style="font-size:1.1rem" id="dashTime">0m</div></div>
+                <div><div class="label mono dim" style="font-size:.72rem">HINTS USED</div><div class="value" style="font-size:1.1rem" id="dashHints">0</div></div>
               </div>
             </section>
 
             <section class="glass panel-lg">
-              <p class="eyebrow">Quick updates</p>
-              <div class="terminal" style="margin-top:.75rem">
+              <p class="eyebrow">Mission progress</p>
+              <h2 style="font-size:1.15rem;margin:.35rem 0 .75rem" id="progressTitle">0/9 Missions Completed</h2>
+              <div class="progress" style="height:14px"><span id="dashProgress" style="width:0%"></span></div>
+              <p class="mono dim" style="margin-top:.65rem" id="dashProgressLabel">0%</p>
+              <div class="terminal" style="margin-top:1rem">
                 <div class="terminal-bar"><span class="terminal-dot red"></span><span class="terminal-dot"></span><span class="terminal-dot"></span></div>
                 <div class="terminal-body" id="dashTerm"></div>
               </div>
@@ -79,32 +85,34 @@
 
           <div class="section-head" style="margin-top:2rem">
             <div>
-              <p class="eyebrow">Your challenges</p>
-              <h2 style="font-size:1.25rem">By week</h2>
+              <p class="eyebrow">Season missions</p>
+              <h2>Active operations</h2>
             </div>
-          </div>
-
-          <div class="week-tabs" id="weekTabs">
-            <button class="week-tab active" type="button" data-week="1">Week 1</button>
-            <button class="week-tab" type="button" data-week="2">Week 2</button>
-            <button class="week-tab" type="button" data-week="3">Week 3</button>
+            <div class="week-tabs" id="weekTabs"></div>
           </div>
           <div class="mission-grid" id="missionGrid"></div>
 
-          <div class="section-head" style="margin-top:2.5rem">
+          <div class="section-head" style="margin-top:2rem">
             <div>
-              <p class="eyebrow">Competition</p>
-              <h2 style="font-size:1.25rem">Leaderboard snapshot</h2>
+              <p class="eyebrow">Competition pulse</p>
+              <h2>Top operatives</h2>
             </div>
-            <a class="btn btn-ghost btn-sm" href="leaderboard.html">Full list</a>
+            <a class="btn btn-ghost btn-sm" href="leaderboard.html">Full leaderboard</a>
           </div>
           <div class="glass panel">
-            <table class="rank-table" id="lbPreview">
-              <thead>
-                <tr><th>Rank</th><th>Student</th><th>Score</th><th>Badge</th></tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+            <div class="admin-table-wrap">
+              <table class="rank-table" id="lbPreview">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Operative</th>
+                    <th>Cyber XP</th>
+                    <th>Badge</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
@@ -113,8 +121,9 @@
   <script type="module" src="/js/core.js"></script>
   <script type="module" src="/js/avatars.js"></script>
   <script type="module" src="/js/supabase-auth.js"></script>
+  <script type="module" src="/js/competition.js"></script>
   <script type="module" src="/js/dashboard.js"></script>
-  <script type="module">
+  <script>
     document.getElementById("signOutBtn")?.addEventListener("click", async () => {
       await ACCAuth.signOut();
       location.href = "login.html";

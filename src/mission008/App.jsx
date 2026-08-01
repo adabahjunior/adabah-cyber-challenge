@@ -13,6 +13,7 @@ import AffectedSystems from "./components/AffectedSystems";
 import AntivirusReport from "./components/AntivirusReport";
 import RecoveryPlan from "./components/RecoveryPlan";
 import ContainmentReport from "./components/ContainmentReport";
+import { syncMissionCompletion } from "../mission/lib/syncCompletion";
 import "../mission/styles/mission.css";
 import "../mission002/styles.css";
 import "./styles.css";
@@ -197,18 +198,12 @@ export default function App() {
     setShowCompleteAnim(true);
     setTimeout(() => setShowCompleteAnim(false), 5200);
 
-    try {
-      const raw = localStorage.getItem("acc_participant_v1");
-      if (raw) {
-        const user = JSON.parse(raw);
-        if (!user.completed?.includes("M08")) {
-          user.completed = [...(user.completed || []), "M08"];
-          user.score = (user.score || 0) + score;
-          user.progress = Math.min(100, (user.progress || 0) + 10);
-          localStorage.setItem("acc_participant_v1", JSON.stringify(user));
-        }
-      }
-    } catch (_) {}
+    void syncMissionCompletion({
+      missionId: "M08",
+      score,
+      elapsed,
+      hintsUsed,
+    });
   }
 
   const activeEv = mission.evidence.find((e) => e.id === activeEvidence);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin | ADABAH Cyber Challenge</title>
+  <title>Admin Command Center | ADABAH Cyber Challenge</title>
   <link rel="icon" href="/assets/logo.svg">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -14,9 +14,10 @@
   <div class="page">
     <header class="site-header">
       <div class="container">
-        <a class="brand" href="dashboard.html"><span class="brand-mark">ACC</span> Admin Console</a>
+        <a class="brand" href="dashboard.html"><span class="brand-mark">ACC</span> Admin Command Center</a>
         <nav class="nav-links" data-nav-links>
           <a href="dashboard.html">Exit Admin</a>
+          <a href="results.html">Results</a>
         </nav>
       </div>
     </header>
@@ -25,35 +26,71 @@
       <div class="container-fluid" style="width:min(100%,1180px)">
         <div class="page-title">
           <div>
-            <p class="eyebrow">Control Plane</p>
-            <h1>Administrator Dashboard</h1>
-            <p class="muted" style="margin-top:.4rem">Restricted to the ACC administrator account.</p>
+            <p class="eyebrow">Competition operations</p>
+            <h1>Administrator Command Center</h1>
+            <p class="muted" style="margin-top:.4rem">Monitor rankings, missions, certificates, and live competition activity.</p>
           </div>
           <span class="badge badge-red">ROOT ACCESS</span>
         </div>
 
         <div class="admin-grid">
-          <div class="glass panel stat-card"><div class="label">Participants</div><div class="value accent" id="statParticipants">0</div></div>
-          <div class="glass panel stat-card"><div class="label">Portraits uploaded</div><div class="value" id="statPhotos">0</div></div>
-          <div class="glass panel stat-card"><div class="label">Challenges cleared</div><div class="value" id="statCleared">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Registered</div><div class="value accent" id="statParticipants">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Active / Completed</div><div class="value" id="statActiveDone">0 / 0</div></div>
+          <div class="glass panel stat-card"><div class="label">Avg Cyber XP</div><div class="value" id="statAvgScore">0</div></div>
           <div class="glass panel stat-card"><div class="label">Live missions</div><div class="value" id="statLiveMissions">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Mission clears</div><div class="value" id="statCleared">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Current leader</div><div class="value" style="font-size:1rem" id="statLeader">—</div></div>
         </div>
 
         <div class="admin-tabs" id="adminTabs">
-          <button class="admin-tab active" type="button" data-panel="participants">Participants</button>
+          <button class="admin-tab active" type="button" data-panel="overview">Overview</button>
+          <button class="admin-tab" type="button" data-panel="participants">Participants</button>
           <button class="admin-tab" type="button" data-panel="access">Access Gate</button>
           <button class="admin-tab" type="button" data-panel="missions">Missions</button>
           <button class="admin-tab" type="button" data-panel="leaderboard">Leaderboard</button>
+          <button class="admin-tab" type="button" data-panel="certificates">Certificates</button>
           <button class="admin-tab" type="button" data-panel="files">Upload Files</button>
-          <button class="admin-tab" type="button" data-panel="submissions">Submissions</button>
         </div>
+
+        <section class="admin-panel glass panel-lg" data-panel="overview">
+          <p class="eyebrow">Live competition monitoring</p>
+          <h2 style="font-size:1.15rem;margin-top:.35rem">Command overview</h2>
+          <div class="row" style="margin:1rem 0;gap:.5rem;flex-wrap:wrap">
+            <label class="mono dim">Competition status</label>
+            <select id="compStatusSelect" class="acc-native-select">
+              <option value="upcoming">Upcoming</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button class="btn btn-primary btn-sm" type="button" id="compStatusSave">Update status</button>
+            <button class="btn btn-ghost btn-sm" type="button" id="refreshAwardsBtn">Refresh awards</button>
+            <a class="btn btn-ghost btn-sm" href="results.html">Open final results</a>
+          </div>
+          <p class="field-hint" id="overviewMsg"></p>
+          <div class="grid-2" style="margin-top:1rem">
+            <div>
+              <p class="eyebrow">Activity feed</p>
+              <div class="terminal" style="margin-top:.5rem;max-height:280px;overflow:auto">
+                <div class="terminal-body" id="activityFeed">Loading…</div>
+              </div>
+            </div>
+            <div>
+              <p class="eyebrow">Mission health</p>
+              <div class="admin-table-wrap" style="margin-top:.5rem">
+                <table class="rank-table" id="missionHealthTable">
+                  <thead><tr><th>Mission</th><th>Started</th><th>Done</th><th>Avg XP</th><th>Avg time</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section class="admin-panel glass panel-lg" data-panel="access" hidden>
           <p class="eyebrow">Signup & login gate</p>
           <h2 style="font-size:1.15rem;margin-top:.35rem">Waiting room</h2>
           <p class="muted" style="margin:.65rem 0 1rem;max-width:60ch">
-            When this gate is <strong>active</strong>, every new signup and every non-admin login stops on the waiting page
-            (“admin will contact you on WhatsApp”). Students cannot open the dashboard, challenges, or missions until you deactivate it.
+            When this gate is <strong>active</strong>, every new signup and every non-admin login stops on the waiting page.
             Your admin account is never blocked.
           </p>
           <div class="glass panel" style="padding:1.1rem 1.2rem">
@@ -68,10 +105,19 @@
           </div>
         </section>
 
-        <section class="admin-panel glass panel-lg" data-panel="participants">
-          <p class="eyebrow">Registered students</p>
-          <p class="muted" style="margin:.5rem 0 0">Live list from Supabase onboarding. Download each uploaded portrait as JPG.</p>
-          <div class="admin-table-wrap" style="margin-top:1rem">
+        <section class="admin-panel glass panel-lg" data-panel="participants" hidden>
+          <p class="eyebrow">Participant management</p>
+          <div class="row" style="margin:.75rem 0;gap:.5rem;flex-wrap:wrap">
+            <input class="acc-native-select" id="participantSearch" placeholder="Search name, username, email…" style="flex:1;min-width:220px">
+            <select class="acc-native-select" id="participantDeptFilter"><option value="">All departments</option></select>
+            <select class="acc-native-select" id="participantStatusFilter">
+              <option value="">All status</option>
+              <option value="active">In progress</option>
+              <option value="completed">Completed (9/9)</option>
+              <option value="new">Not started</option>
+            </select>
+          </div>
+          <div class="admin-table-wrap">
             <table class="rank-table" id="participantTable">
               <thead>
                 <tr>
@@ -79,29 +125,33 @@
                   <th>Name / Email</th>
                   <th>Handle</th>
                   <th>Dept</th>
-                  <th>Level</th>
-                  <th>WhatsApp</th>
-                  <th>Score</th>
+                  <th>Rank</th>
+                  <th>XP</th>
+                  <th>Missions</th>
+                  <th>Cert</th>
                   <th>Portrait</th>
-                  <th>Joined</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
+          <div class="glass panel" id="participantDetail" style="margin-top:1rem" hidden>
+            <p class="eyebrow">Participant dossier</p>
+            <div id="participantDetailBody"></div>
+          </div>
         </section>
 
         <section class="admin-panel glass panel-lg" data-panel="leaderboard" hidden>
           <p class="eyebrow">Leaderboard</p>
-          <p class="muted" style="margin:0.75rem 0 1rem">Ranks are calculated from registered participant scores.</p>
           <div class="row">
             <button class="btn btn-primary" type="button" id="recalcBtn">Refresh ranks</button>
-            <button class="btn btn-ghost" type="button" id="freezeBtn">Freeze board</button>
+            <button class="btn btn-ghost" type="button" id="exportResultsBtn">Export results CSV</button>
           </div>
           <p class="field-hint" id="lbAdminMsg" style="margin-top:1rem"></p>
           <div class="admin-table-wrap" style="margin-top:1rem">
             <table class="rank-table">
-              <thead><tr><th>Rank</th><th>User</th><th>Score</th><th>Badge</th></tr></thead>
+              <thead><tr><th>Rank</th><th>User</th><th>XP</th><th>Missions</th><th>Badge</th></tr></thead>
               <tbody id="adminLb"></tbody>
             </table>
           </div>
@@ -109,7 +159,7 @@
 
         <section class="admin-panel glass panel-lg" data-panel="missions" hidden>
           <p class="eyebrow">Mission control</p>
-          <p class="muted" style="margin:.5rem 0 0">Activate or deactivate missions and assign the week students should complete them. Only active missions appear on the student dashboard and challenges page.</p>
+          <p class="muted" style="margin:.5rem 0 0">Activate missions and assign weeks. Only active missions appear for students.</p>
           <p class="field-hint" id="missionMsg" style="margin-top:.75rem"></p>
           <div class="admin-table-wrap" style="margin-top:1rem">
             <table class="rank-table" id="missionTable">
@@ -129,6 +179,18 @@
           </div>
         </section>
 
+        <section class="admin-panel glass panel-lg" data-panel="certificates" hidden>
+          <p class="eyebrow">Certificate studio</p>
+          <p class="muted" style="margin:.5rem 0 1rem">Preview and download participant certificates.</p>
+          <div class="row" style="gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+            <select class="acc-native-select" id="certParticipant" style="min-width:240px"></select>
+            <button class="btn btn-primary btn-sm" type="button" id="certPreviewBtn">Preview</button>
+            <button class="btn btn-ghost btn-sm" type="button" id="certJpgBtn">Download JPG</button>
+            <button class="btn btn-ghost btn-sm" type="button" id="certPdfBtn">Download PDF</button>
+          </div>
+          <canvas id="certCanvas" width="1400" height="990" style="width:100%;max-width:720px;border-radius:12px;border:1px solid rgba(224,17,54,.35);background:#000"></canvas>
+        </section>
+
         <section class="admin-panel glass panel-lg" data-panel="files" hidden>
           <p class="eyebrow">Challenge Files</p>
           <div class="dropzone" style="margin-top:1rem" id="dropzone">
@@ -138,22 +200,13 @@
           </div>
           <ul id="fileList" class="objective-list" style="margin-top:1rem"></ul>
         </section>
-
-        <section class="admin-panel glass panel-lg" data-panel="submissions" hidden>
-          <p class="eyebrow">Submission Review</p>
-          <div class="admin-table-wrap" style="margin-top:1rem">
-            <table class="rank-table" id="subTable">
-              <thead><tr><th>Time</th><th>User</th><th>Mission</th><th>Flag</th><th>Status</th><th></th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </section>
       </div>
     </main>
   </div>
   <script type="module" src="/js/core.js"></script>
   <script type="module" src="/js/selects.js"></script>
   <script type="module" src="/js/supabase-auth.js"></script>
+  <script type="module" src="/js/competition.js"></script>
   <script type="module" src="/js/admin.js"></script>
 </body>
 </html>

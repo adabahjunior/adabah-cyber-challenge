@@ -12,6 +12,7 @@ import HashLaboratory from "./components/HashLaboratory";
 import PolicyViewer from "./components/PolicyViewer";
 import FinalAssessment from "./components/FinalAssessment";
 import PasswordStrengthMeter from "./components/PasswordStrengthMeter";
+import { syncMissionCompletion } from "../mission/lib/syncCompletion";
 import "../mission/styles/mission.css";
 import "../mission002/styles.css";
 import "./styles.css";
@@ -186,18 +187,12 @@ export default function App() {
     setShowCompleteAnim(true);
     setTimeout(() => setShowCompleteAnim(false), 4200);
 
-    try {
-      const raw = localStorage.getItem("acc_participant_v1");
-      if (raw) {
-        const user = JSON.parse(raw);
-        if (!user.completed?.includes("M04")) {
-          user.completed = [...(user.completed || []), "M04"];
-          user.score = (user.score || 0) + score;
-          user.progress = Math.min(100, (user.progress || 0) + 10);
-          localStorage.setItem("acc_participant_v1", JSON.stringify(user));
-        }
-      }
-    } catch (_) {}
+    void syncMissionCompletion({
+      missionId: "M04",
+      score,
+      elapsed,
+      hintsUsed,
+    });
   }
 
   const activeEv = mission.evidence.find((e) => e.id === activeEvidence);
