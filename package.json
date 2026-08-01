@@ -1,0 +1,10 @@
+{
+  "name": "adabah-cyber-challenge",
+  "private": true,
+  "scripts": {
+    "start": "python -m http.server 5500"
+  },
+  "devDependencies": {
+    "supabase": "^2.111.0"
+  }
+}

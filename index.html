@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADABAH Cyber Challenge | Practice. Compete. Learn.</title>
+  <meta name="description" content="A 3-week security challenge where students learn by solving real practice tasks.">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">ACC</span>
+          ADABAH <span class="acc">Cyber Challenge</span>
+        </a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-label="Menu">☰</button>
+        <nav class="nav-links" data-nav-links>
+          <a href="index.html">Home</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="login.html">Sign in</a>
+          <a class="btn btn-primary btn-sm" href="onboarding.html">Join now</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow reveal">Season 1 · cybercc.adabah.com</p>
+          <h1 class="reveal">Enter The Cyber Battlefield</h1>
+          <p class="lede reveal">A 3-week challenge where students practice real security skills through hands-on tasks — and climb the leaderboard along the way.</p>
+          <div class="hero-actions reveal">
+            <a class="btn btn-primary" href="onboarding.html">Join the challenge</a>
+            <a class="btn btn-ghost" href="leaderboard.html">See the leaderboard</a>
+          </div>
+          <div class="countdown reveal" id="countdown" aria-label="Time left">
+            <div class="glass countdown-cell"><div class="num" data-days>00</div><div class="unit">Days</div></div>
+            <div class="glass countdown-cell"><div class="num" data-hours>00</div><div class="unit">Hours</div></div>
+            <div class="glass countdown-cell"><div class="num" data-mins>00</div><div class="unit">Mins</div></div>
+            <div class="glass countdown-cell"><div class="num" data-secs>00</div><div class="unit">Secs</div></div>
+          </div>
+        </div>
+
+        <div class="hero-side reveal">
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="terminal-dot red"></span>
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+              <span class="mono dim" style="margin-left:.5rem;font-size:.75rem">ACC status</span>
+            </div>
+            <div class="terminal-body" id="heroTerminal"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <div class="stat-grid reveal">
+        <div class="glass panel stat-card">
+          <div class="label">Students joined</div>
+          <div class="value accent" data-count="1248">0</div>
+        </div>
+        <div class="glass panel stat-card">
+          <div class="label">Challenges</div>
+          <div class="value">10</div>
+        </div>
+        <div class="glass panel stat-card">
+          <div class="label">Tasks finished</div>
+          <div class="value accent" data-count="3864">0</div>
+        </div>
+        <div class="glass panel stat-card">
+          <div class="label">Length</div>
+          <div class="value">3 WKS</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="prize-banner reveal">
+          <div>
+            <p class="eyebrow">Prizes</p>
+            <strong>Top students get recognition and rewards</strong>
+            <p class="muted" style="margin-top:.4rem">Certificates · Rank badges · ACC elite status</p>
+          </div>
+          <a class="btn btn-primary" href="onboarding.html">Join now</a>
+        </div>
+
+        <div class="section-head" style="margin-top:3.5rem">
+          <div>
+            <p class="eyebrow">Why join</p>
+            <h2>Made for university students</h2>
+          </div>
+        </div>
+
+        <div class="feature-strip">
+          <article class="glass panel-lg feature-card reveal">
+            <p class="eyebrow">01</p>
+            <h3>Learn by doing</h3>
+            <p class="muted">Practice real skills — finding clues, spotting risks, and solving tasks — not just reading slides.</p>
+          </article>
+          <article class="glass panel-lg feature-card reveal">
+            <p class="eyebrow">02</p>
+            <h3>Friendly competition</h3>
+            <p class="muted">Earn points as you finish challenges and watch your place on the leaderboard rise.</p>
+          </article>
+          <article class="glass panel-lg feature-card reveal">
+            <p class="eyebrow">03</p>
+            <h3>Fair play</h3>
+            <p class="muted">We keep the contest honest. Warnings are tracked so everyone has a fair shot.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div>© <span id="year"></span> ADABAH Cyber Challenge</div>
+        <div class="mono">cybercc.adabah.com</div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    const end = Date.now() + 18 * 86400000 + 5 * 3600000;
+    ACC.startCountdown(document.getElementById("countdown"), end);
+    ACC.typeTerminal(document.getElementById("heroTerminal"), [
+      "$ checking challenge status",
+      "OK season 1 is open",
+      "$ students online",
+      "OK 1248 joined so far",
+      "$ week 1 challenges",
+      "OK ready when you are_"
+    ]);
+    document.querySelectorAll("[data-count]").forEach((el) => {
+      const target = Number(el.dataset.count);
+      let n = 0;
+      const step = Math.ceil(target / 48);
+      const t = setInterval(() => {
+        n = Math.min(target, n + step);
+        el.textContent = n.toLocaleString();
+        if (n >= target) clearInterval(t);
+      }, 30);
+    });
+  </script>
+</body>
+</html>

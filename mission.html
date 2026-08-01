@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mission Room | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="dashboard.html"><span class="brand-mark">ACC</span> ADABAH <span class="acc">Cyber Challenge</span></a>
+        <nav class="nav-links" data-nav-links>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="leaderboard.html">Leaderboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="app-main" style="padding-top:1.75rem">
+      <div class="container">
+        <div class="page-title">
+          <div>
+            <p class="eyebrow">Challenge · M02</p>
+            <h1 class="mono" style="font-family:var(--font-mono);letter-spacing:0.02em">Footprint Analysis</h1>
+            <div class="row" style="margin-top:.65rem">
+              <span class="badge badge-yellow">Medium</span>
+              <span class="badge badge-red">150 PTS</span>
+              <span class="badge">Week 1</span>
+            </div>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="dashboard.html">← Back</a>
+        </div>
+
+        <div class="mission-layout">
+          <div class="stack">
+            <section class="glass panel-lg">
+              <p class="eyebrow">Story</p>
+              <h2 style="font-size:1.1rem;margin:.5rem 0 .75rem">The Quiet Signal</h2>
+              <p class="muted">
+                A university website has left some public clues online. Your job is to carefully map what’s visible, spot one useful lead, and find the challenge answer — without breaking any rules or going outside the practice area.
+              </p>
+            </section>
+
+            <section class="glass panel-lg">
+              <p class="eyebrow">What to do</p>
+              <ul class="objective-list" style="margin-top:.75rem">
+                <li>Find public website names linked to the target</li>
+                <li>Note at least one open service or clue</li>
+                <li>Find the answer (flag) in the brief</li>
+                <li>Submit it before time runs out</li>
+              </ul>
+            </section>
+
+            <section class="glass panel-lg">
+              <p class="eyebrow">Helpful files</p>
+              <div class="resource-item"><span>intel_brief.pdf</span><button class="btn btn-ghost btn-sm" type="button">Download</button></div>
+              <div class="resource-item"><span>scope_rules.txt</span><button class="btn btn-ghost btn-sm" type="button">Download</button></div>
+              <div class="resource-item"><span>lab VPN profile</span><button class="btn btn-ghost btn-sm" type="button">Connect</button></div>
+            </section>
+
+            <section class="glass panel-lg">
+              <p class="eyebrow">Your answer</p>
+              <form id="flagForm" style="margin-top:.75rem">
+                <div class="field">
+                  <label for="flag">Flag / answer</label>
+                  <input id="flag" class="code" placeholder="ACC{...}" required>
+                </div>
+                <button class="btn btn-primary" type="submit">Submit answer</button>
+                <p class="field-hint" id="flagMsg" style="margin-top:.65rem"></p>
+              </form>
+            </section>
+          </div>
+
+          <aside class="stack">
+            <section class="glass panel">
+              <p class="eyebrow">Time left</p>
+              <div class="mono" style="font-size:2rem;margin:.5rem 0" id="missionTimer">45:00</div>
+              <div class="progress"><span id="timerBar" style="width:100%"></span></div>
+            </section>
+
+            <section class="glass panel">
+              <p class="eyebrow">Progress</p>
+              <div class="mono" style="margin:.5rem 0">2 / 4 objectives</div>
+              <div class="progress"><span style="width:50%"></span></div>
+            </section>
+
+            <section class="monitor">
+              <h4>Fair play check</h4>
+              <p class="muted" style="font-size:.9rem;margin-bottom:.65rem">We watch for unfair teamwork so the contest stays honest for everyone.</p>
+              <div class="row" style="justify-content:space-between">
+                <span class="mono">Warnings</span>
+                <span class="mono" style="color:var(--red-bright)" id="warnCount">0 / 3</span>
+              </div>
+            </section>
+
+            <section class="terminal">
+              <div class="terminal-bar"><span class="terminal-dot red"></span><span class="terminal-dot"></span><span class="terminal-dot"></span></div>
+              <div class="terminal-body" id="missionTerm" style="min-height:120px;font-size:.82rem"></div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="js/core.js"></script>
+  <script src="js/mission.js"></script>
+</body>
+</html>

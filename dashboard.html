@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Command Center | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="index.html"><span class="brand-mark">ACC</span> ADABAH <span class="acc">Cyber Challenge</span></a>
+        <nav class="nav-links" data-nav-links>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="profile.html">Profile</a>
+          <a href="admin.html">Admin</a>
+          <button class="btn btn-ghost btn-sm" type="button" id="signOutBtn">Sign out</button>
+        </nav>
+      </div>
+    </header>
+
+    <div class="app-shell">
+      <aside class="side-rail">
+        <a class="active" href="dashboard.html">◈ Home</a>
+        <a href="mission.html">⚔ Challenges</a>
+        <a href="leaderboard.html">▤ Leaderboard</a>
+        <a href="profile.html">◎ Profile</a>
+        <a href="admin.html">▣ Admin</a>
+      </aside>
+
+      <main class="app-main">
+        <div class="container-fluid">
+          <div class="page-title">
+            <div>
+              <p class="eyebrow">Your home</p>
+              <h1>Dashboard</h1>
+            </div>
+            <a class="btn btn-primary btn-sm" href="mission.html">Continue challenge</a>
+          </div>
+
+          <div class="grid-2">
+            <section class="glass panel-lg">
+              <div class="profile-hero">
+                <div class="avatar lg" id="dashAvatar">NX</div>
+                <div id="dashAnim" aria-hidden="true"></div>
+                <div style="flex:1">
+                  <div class="mono" style="font-size:1.1rem" id="dashName">@student</div>
+                  <div class="muted" id="dashMeta">Beginner</div>
+                  <div style="margin-top:0.85rem">
+                    <div class="row" style="justify-content:space-between;margin-bottom:.35rem">
+                      <span class="mono dim" style="font-size:.75rem">SEASON PROGRESS</span>
+                      <span class="mono" id="dashProgressLabel">28%</span>
+                    </div>
+                    <div class="progress"><span id="dashProgress" style="width:28%"></span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="stat-grid" style="margin-top:1.25rem;grid-template-columns:repeat(3,1fr)">
+                <div><div class="label mono dim" style="font-size:.72rem">RANK</div><div class="value" style="font-size:1.4rem" id="dashRank">#14</div></div>
+                <div><div class="label mono dim" style="font-size:.72rem">SCORE</div><div class="value accent" style="font-size:1.4rem" id="dashScore">1250</div></div>
+                <div><div class="label mono dim" style="font-size:.72rem">CLEARED</div><div class="value" style="font-size:1.4rem" id="dashCleared">1/10</div></div>
+              </div>
+            </section>
+
+            <section class="glass panel-lg">
+              <p class="eyebrow">Quick updates</p>
+              <div class="terminal" style="margin-top:.75rem">
+                <div class="terminal-bar"><span class="terminal-dot red"></span><span class="terminal-dot"></span><span class="terminal-dot"></span></div>
+                <div class="terminal-body" id="dashTerm"></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="section-head" style="margin-top:2rem">
+            <div>
+              <p class="eyebrow">Your challenges</p>
+              <h2 style="font-size:1.25rem">By week</h2>
+            </div>
+          </div>
+
+          <div class="week-tabs" id="weekTabs">
+            <button class="week-tab active" type="button" data-week="1">Week 1</button>
+            <button class="week-tab" type="button" data-week="2">Week 2</button>
+            <button class="week-tab" type="button" data-week="3">Week 3</button>
+          </div>
+          <div class="mission-grid" id="missionGrid"></div>
+
+          <div class="section-head" style="margin-top:2.5rem">
+            <div>
+              <p class="eyebrow">Competition</p>
+              <h2 style="font-size:1.25rem">Leaderboard snapshot</h2>
+            </div>
+            <a class="btn btn-ghost btn-sm" href="leaderboard.html">Full list</a>
+          </div>
+          <div class="glass panel">
+            <table class="rank-table" id="lbPreview">
+              <thead>
+                <tr><th>Rank</th><th>Student</th><th>Score</th><th>Badge</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="js/core.js"></script>
+  <script src="js/avatars.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script>
+    document.getElementById("signOutBtn")?.addEventListener("click", async () => {
+      await ACCAuth.signOut();
+      location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

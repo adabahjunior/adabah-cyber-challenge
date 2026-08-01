@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboard | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="index.html"><span class="brand-mark">ACC</span> ADABAH <span class="acc">Cyber Challenge</span></a>
+        <button class="nav-toggle" type="button" data-nav-toggle aria-label="Menu">☰</button>
+        <nav class="nav-links" data-nav-links>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="profile.html">Profile</a>
+          <a href="login.html">Login</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="section" style="padding-top:2.5rem">
+      <div class="container">
+        <div class="page-title">
+          <div>
+            <p class="eyebrow">Leaderboard · Season 1</p>
+            <h1>Who’s ahead</h1>
+            <p class="muted" style="margin-top:.5rem;max-width:48ch">Finish challenges, earn points, and move up. Top students set the pace for everyone else.</p>
+          </div>
+          <div class="glass panel" style="min-width:200px">
+            <div class="mono dim" style="font-size:.72rem">YOUR PLACE</div>
+            <div class="mono" style="font-size:1.6rem;color:var(--red-bright)" id="youRank">#—</div>
+          </div>
+        </div>
+
+        <div class="grid-3 reveal" style="margin-bottom:1.5rem">
+          <div class="glass panel-lg glass-red" id="podium1"></div>
+          <div class="glass panel-lg" id="podium2"></div>
+          <div class="glass panel-lg" id="podium3"></div>
+        </div>
+
+        <div class="glass panel reveal">
+          <div class="admin-table-wrap">
+            <table class="rank-table" id="fullBoard">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Student</th>
+                  <th>Score</th>
+                  <th>Challenges</th>
+                  <th>Badge</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div>ADABAH Cyber Challenge</div>
+        <div class="mono">cybercc.adabah.com</div>
+      </div>
+    </footer>
+  </div>
+  <script src="js/core.js"></script>
+  <script src="js/leaderboard.js"></script>
+</body>
+</html>

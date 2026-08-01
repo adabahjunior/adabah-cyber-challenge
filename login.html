@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">ACC</span>
+          ADABAH <span class="acc">Cyber Challenge</span>
+        </a>
+        <nav class="nav-links" data-nav-links>
+          <a href="index.html">Home</a>
+          <a href="onboarding.html">Join</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="auth-shell">
+      <div class="glass glass-red auth-card">
+        <p class="eyebrow">welcome back</p>
+        <h1>Sign in</h1>
+        <p class="muted" style="margin-bottom:1.25rem">Use the email and password you created when you joined.</p>
+
+        <div class="terminal" style="margin-bottom:1.25rem">
+          <div class="terminal-bar">
+            <span class="terminal-dot red"></span>
+            <span class="terminal-dot"></span>
+            <span class="terminal-dot"></span>
+          </div>
+          <div class="terminal-body" id="loginTerm" style="min-height:72px"></div>
+        </div>
+
+        <form id="loginForm">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="ama@university.edu" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="6">
+          </div>
+          <p class="field-hint" id="loginError" style="color:var(--red-bright);min-height:1.2em"></p>
+          <button class="btn btn-primary btn-block" type="submit" id="loginBtn">Sign in</button>
+        </form>
+        <p class="dim" style="margin-top:1rem;font-size:.9rem;text-align:center">
+          New here? <a href="onboarding.html" style="color:var(--red-bright)">Create an account</a>
+        </p>
+      </div>
+    </main>
+  </div>
+  <script src="js/core.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script>
+    ACC.typeTerminal(document.getElementById("loginTerm"), [
+      "$ ready for sign in",
+      "OK waiting for your email_"
+    ], 16);
+
+    (async () => {
+      try {
+        const session = await ACCAuth.getSession();
+        if (session) {
+          const synced = await ACCAuth.syncLocalFromCloud();
+          location.replace(synced?.local?.onboarded ? "dashboard.html" : "onboarding.html");
+        }
+      } catch (_) {}
+    })();
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const err = document.getElementById("loginError");
+      const btn = document.getElementById("loginBtn");
+      err.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Signing in…";
+      try {
+        await ACCAuth.signIn({
+          email: document.getElementById("email").value.trim(),
+          password: document.getElementById("password").value,
+        });
+        const synced = await ACCAuth.syncLocalFromCloud();
+        location.href = synced?.local?.onboarded ? "dashboard.html" : "onboarding.html";
+      } catch (ex) {
+        err.textContent = ex.message || "Sign in failed";
+        btn.disabled = false;
+        btn.textContent = "Sign in";
+      }
+    });
+  </script>
+</body>
+</html>

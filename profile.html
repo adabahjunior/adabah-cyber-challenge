@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="dashboard.html"><span class="brand-mark">ACC</span> ADABAH <span class="acc">Cyber Challenge</span></a>
+        <nav class="nav-links" data-nav-links>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="leaderboard.html">Leaderboard</a>
+          <a href="profile.html">Profile</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="section" style="padding-top:2.5rem">
+      <div class="container">
+        <div class="glass panel-lg">
+            <div class="profile-hero">
+              <div class="avatar xl" id="pAvatar">NX</div>
+              <div id="pAnim" aria-hidden="true"></div>
+              <div style="flex:1">
+              <p class="eyebrow">Your profile</p>
+              <h1 class="mono" style="font-family:var(--font-mono);font-size:clamp(1.4rem,3vw,2rem)" id="pHandle">@student</h1>
+              <p class="muted" id="pMeta">—</p>
+              <div class="row" style="margin-top:.85rem">
+                <span class="badge badge-red" id="pBadge">Recruit</span>
+                <span class="badge" id="pRank">Rank #14</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-grid" style="margin-top:1.25rem">
+          <div class="glass panel stat-card"><div class="label">Score</div><div class="value accent" id="pScore">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Challenges</div><div class="value" id="pMissions">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Warnings</div><div class="value" id="pWarn">0/3</div></div>
+          <div class="glass panel stat-card"><div class="label">Progress</div><div class="value" id="pProg">0%</div></div>
+        </div>
+
+        <div class="section-head" style="margin-top:2.5rem">
+          <div><p class="eyebrow">Badges</p><h2 style="font-size:1.25rem">What you’ve earned</h2></div>
+        </div>
+        <div class="achievement-grid" id="achievements"></div>
+
+        <div class="grid-2" style="margin-top:2rem">
+          <section class="glass panel-lg">
+            <p class="eyebrow">Finished challenges</p>
+            <ul id="completedList" class="objective-list" style="margin-top:.75rem"></ul>
+          </section>
+          <section class="glass panel-lg">
+            <p class="eyebrow">Certificates</p>
+            <div class="stack" style="margin-top:.75rem">
+              <div class="glass panel">
+                <div class="mono">ACC Season 1 — Participation</div>
+                <p class="dim" style="font-size:.85rem;margin-top:.35rem">Available after the challenge ends</p>
+                <button class="btn btn-ghost btn-sm" type="button" style="margin-top:.75rem" disabled>Coming soon</button>
+              </div>
+              <div class="glass panel">
+                <div class="mono">ACC Top Performer</div>
+                <p class="dim" style="font-size:.85rem;margin-top:.35rem">Finish in the top 10</p>
+                <button class="btn btn-ghost btn-sm" type="button" style="margin-top:.75rem" disabled>Locked</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="js/core.js"></script>
+  <script src="js/avatars.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script>
+    (async () => {
+      const cloud = await ACCAuth.requireCloudAuth();
+      if (!cloud) return;
+      const user = cloud.local;
+      const handle = user.hackerName || user.username;
+      document.getElementById("pAvatar").classList.add("has-photo");
+      if (user.portraitUrl) {
+        document.getElementById("pAvatar").innerHTML = `<img src="${user.portraitUrl}" alt="">`;
+      } else {
+        document.getElementById("pAvatar").textContent = user.avatar || ACC.initials(handle);
+        document.getElementById("pAvatar").classList.remove("has-photo");
+      }
+      ACCAvatars.mount(document.getElementById("pAnim"), user.avatarStyle || "pulse", "xl");
+      document.getElementById("pHandle").textContent = `@${handle}`;
+      document.getElementById("pMeta").textContent = `${user.fullName || "Student"} · ${user.department || "ACC"} · ${user.level}`;
+      document.getElementById("pRank").textContent = user.rank ? `Rank #${user.rank}` : "Rank —";
+      document.getElementById("pScore").textContent = (user.score || 0).toLocaleString();
+      document.getElementById("pMissions").textContent = `${user.completed?.length || 0}/10`;
+      document.getElementById("pWarn").textContent = `${user.warnings || 0}/3`;
+      document.getElementById("pProg").textContent = `${user.progress || 0}%`;
+
+      const achievements = [
+        { icon: "⚑", name: "First win", on: (user.completed || []).length > 0 },
+        { icon: "◈", name: "Getting started", on: (user.completed || []).includes("M01") },
+        { icon: "⚡", name: "Fast finish", on: false },
+        { icon: "🛡", name: "Team defender", on: false },
+        { icon: "♛", name: "Top 10", on: false },
+        { icon: "♾", name: "Perfect week", on: false },
+      ];
+      document.getElementById("achievements").innerHTML = achievements.map((a) => `
+        <div class="achievement ${a.on ? "" : "locked"}">
+          <div class="icon">${a.icon}</div>
+          <div class="mono" style="font-size:.8rem">${a.name}</div>
+        </div>`).join("");
+
+      const names = { M01: "Recon Protocol", M02: "Footprint Analysis" };
+      const list = document.getElementById("completedList");
+      list.innerHTML = "";
+      (user.completed || []).forEach((id) => {
+        const li = document.createElement("li");
+        li.textContent = `${id} · ${names[id] || "Challenge"}`;
+        list.appendChild(li);
+      });
+      if (!(user.completed || []).length) {
+        list.innerHTML = '<li class="muted">No challenges finished yet</li>';
+      }
+    })().catch((e) => {
+      console.error(e);
+      location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

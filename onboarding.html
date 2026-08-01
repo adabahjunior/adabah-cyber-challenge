@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get started | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">ACC</span>
+          ADABAH <span class="acc">Cyber Challenge</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="auth-shell">
+      <div class="glass glass-red auth-card wide">
+        <div class="steps" id="steps"></div>
+
+        <section class="onboard-pane" data-step="1">
+          <p class="eyebrow">Step 1 of 5</p>
+          <h1>Welcome to ADABAH Cyber Challenge</h1>
+          <p class="muted" style="margin:0.75rem 0 1.25rem">A friendly 3-week contest for university students who want to practice real security skills.</p>
+          <div class="grid-3" style="margin-bottom:1.5rem">
+            <div class="glass panel"><div class="mono eyebrow">Length</div><p style="margin-top:.4rem">3 weeks</p></div>
+            <div class="glass panel"><div class="mono eyebrow">Challenges</div><p style="margin-top:.4rem">10 hands-on tasks</p></div>
+            <div class="glass panel"><div class="mono eyebrow">Ranking</div><p style="margin-top:.4rem">See how you compare</p></div>
+          </div>
+          <button class="btn btn-primary" type="button" data-next>Let’s go</button>
+        </section>
+
+        <section class="onboard-pane" data-step="2" hidden>
+          <p class="eyebrow">Step 2 of 5</p>
+          <h1>About you</h1>
+          <p class="muted" style="margin:0.5rem 0 1.25rem">Tell us a bit about yourself so we can set up your account.</p>
+          <form id="profileForm">
+            <div class="grid-2">
+              <div class="field"><label for="fullName">Full name</label><input id="fullName" required placeholder="Ama Mensah"></div>
+              <div class="field"><label for="email">Email</label><input id="email" type="email" required placeholder="ama@university.edu"></div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="department">Department</label>
+                <select id="department" required>
+                  <option value="">Choose one</option>
+                  <option>Computer Science</option>
+                  <option>Cybersecurity</option>
+                  <option>Information Technology</option>
+                  <option>Computer Engineering</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="level">Experience</label>
+                <select id="level" required>
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                </select>
+              </div>
+            </div>
+            <div class="field"><label for="username">Username</label><input id="username" required placeholder="ama_ops" pattern="[A-Za-z0-9_]{3,20}"></div>
+            <div class="field"><label for="password">Password</label><input id="password" type="password" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password"></div>
+            <p class="field-hint" id="profileError" style="color:var(--red-bright);min-height:1.2em"></p>
+            <div class="row">
+              <button class="btn btn-ghost" type="button" data-back>Back</button>
+              <button class="btn btn-primary" type="submit" id="profileContinue">Continue</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="onboard-pane" data-step="3" hidden>
+          <p class="eyebrow">Step 3 of 5</p>
+          <h1>Your photo & display picture</h1>
+          <p class="muted" style="margin:0.5rem 0 1rem">Upload a clear photo of your face, then pick a fun animated picture for the site.</p>
+
+          <div class="field">
+            <label>Portrait photo (required)</label>
+            <div class="portrait-box">
+              <div class="portrait-preview" id="portraitPreview">No photo yet</div>
+              <div>
+                <p class="portrait-help">
+                  <strong>Please upload a clean portrait of yourself</strong> on a plain background.
+                  Face the camera, good lighting, no group photos, no filters that hide your face.
+                </p>
+                <input type="file" id="portraitInput" accept="image/jpeg,image/png,image/webp" hidden>
+                <button class="btn btn-ghost btn-sm" type="button" id="portraitBtn" style="margin-top:.75rem">Upload portrait</button>
+              </div>
+            </div>
+            <label class="check-row" style="margin-top:.85rem">
+              <input type="checkbox" id="portraitConfirm">
+              <span>This is a clear photo of me on a plain background.</span>
+            </label>
+          </div>
+
+          <div class="field">
+            <label for="hackerName">Display name</label>
+            <input id="hackerName" required placeholder="shadowroot" maxlength="20">
+          </div>
+
+          <p class="field-hint" style="margin-bottom:.75rem">Choose an animated display picture</p>
+          <div class="avatar-picker" id="avatarPicker"></div>
+          <p class="field-hint" id="identityError" style="color:var(--red-bright);min-height:1.2em;margin-top:.75rem"></p>
+          <div class="row" style="margin-top:1.25rem">
+            <button class="btn btn-ghost" type="button" data-back>Back</button>
+            <button class="btn btn-primary" type="button" data-next id="identityNext">Continue</button>
+          </div>
+        </section>
+
+        <section class="onboard-pane" data-step="4" hidden>
+          <p class="eyebrow">Step 4 of 5</p>
+          <h1>House rules</h1>
+          <div class="rules-box" style="margin:1rem 0">
+            <ul>
+              <li>Play fair. Don’t cheat or share answers during the challenge.</li>
+              <li>Work on your own unless a task clearly says you can team up.</li>
+              <li>Only submit work you completed yourself.</li>
+              <li>Stay inside the practice systems we give you — don’t attack anything else.</li>
+              <li>Three warnings for unfair play can get you removed from the contest.</li>
+              <li>Be respectful to other students.</li>
+            </ul>
+          </div>
+          <label class="check-row">
+            <input type="checkbox" id="agree">
+            <span>I agree to these rules.</span>
+          </label>
+          <div class="row">
+            <button class="btn btn-ghost" type="button" data-back>Back</button>
+            <button class="btn btn-primary" type="button" id="agreeBtn" disabled>Finish setup</button>
+          </div>
+          <p class="field-hint" id="agreeError" style="color:var(--red-bright);min-height:1.2em;margin-top:.75rem"></p>
+        </section>
+
+        <section class="onboard-pane" data-step="5" hidden>
+          <p class="eyebrow">You’re in</p>
+          <h1>You’re ready to start</h1>
+          <p class="muted" style="margin:0.75rem 0 1.5rem">Your account is set. Week 1 challenges are open — have fun and learn as you go.</p>
+          <div class="glass panel" style="margin-bottom:1.5rem">
+            <div class="profile-hero">
+              <div class="avatar lg has-photo" id="finalPortrait"></div>
+              <div id="finalAnim"></div>
+              <div>
+                <div class="mono" id="finalHandle">@student</div>
+                <div class="muted" id="finalMeta">Beginner</div>
+              </div>
+            </div>
+          </div>
+          <a class="btn btn-primary" href="dashboard.html">Go to my dashboard</a>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="js/core.js"></script>
+  <script src="js/selects.js"></script>
+  <script src="js/avatars.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script src="js/onboarding.js"></script>
+</body>
+</html>

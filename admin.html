@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="dashboard.html"><span class="brand-mark">ACC</span> Admin Console</a>
+        <nav class="nav-links" data-nav-links>
+          <a href="dashboard.html">Exit Admin</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="container-fluid" style="width:min(100%,1180px)">
+        <div class="page-title">
+          <div>
+            <p class="eyebrow">Control Plane</p>
+            <h1>Administrator Dashboard</h1>
+          </div>
+          <span class="badge badge-red">ROOT ACCESS</span>
+        </div>
+
+        <div class="admin-grid">
+          <div class="glass panel stat-card"><div class="label">Participants</div><div class="value accent">1,248</div></div>
+          <div class="glass panel stat-card"><div class="label">Active Missions</div><div class="value">4</div></div>
+          <div class="glass panel stat-card"><div class="label">Pending Reviews</div><div class="value">17</div></div>
+          <div class="glass panel stat-card"><div class="label">Flags Today</div><div class="value">326</div></div>
+        </div>
+
+        <div class="admin-tabs" id="adminTabs">
+          <button class="admin-tab active" type="button" data-panel="missions">Create Missions</button>
+          <button class="admin-tab" type="button" data-panel="files">Upload Files</button>
+          <button class="admin-tab" type="button" data-panel="participants">Participants</button>
+          <button class="admin-tab" type="button" data-panel="leaderboard">Leaderboard</button>
+          <button class="admin-tab" type="button" data-panel="submissions">Submissions</button>
+        </div>
+
+        <section class="admin-panel glass panel-lg" data-panel="missions">
+          <p class="eyebrow">New Mission</p>
+          <form id="missionCreate" class="stack" style="margin-top:1rem">
+            <div class="grid-2">
+              <div class="field"><label>Title</label><input name="title" placeholder="Web Intrusion" required></div>
+              <div class="field"><label>Mission ID</label><input name="id" placeholder="M05" required></div>
+            </div>
+            <div class="grid-3">
+              <div class="field"><label>Week</label><select name="week"><option>1</option><option>2</option><option>3</option></select></div>
+              <div class="field"><label>Difficulty</label><select name="diff"><option>Easy</option><option>Medium</option><option>Hard</option><option>Insane</option></select></div>
+              <div class="field"><label>Points</label><input name="pts" type="number" value="300"></div>
+            </div>
+            <div class="field"><label>Story</label><textarea name="story" placeholder="Mission narrative..."></textarea></div>
+            <div class="field"><label>Objectives (one per line)</label><textarea name="objectives" placeholder="Enumerate targets&#10;Capture flag"></textarea></div>
+            <button class="btn btn-primary" type="submit">Publish Mission</button>
+            <p class="field-hint" id="missionMsg"></p>
+          </form>
+        </section>
+
+        <section class="admin-panel glass panel-lg" data-panel="files" hidden>
+          <p class="eyebrow">Challenge Files</p>
+          <div class="dropzone" style="margin-top:1rem" id="dropzone">
+            Drop challenge archives here or click to upload<br>
+            <span class="dim">.zip · .pdf · .ovpn · max 50MB (UI demo)</span>
+            <input type="file" id="fileInput" hidden multiple>
+          </div>
+          <ul id="fileList" class="objective-list" style="margin-top:1rem"></ul>
+        </section>
+
+        <section class="admin-panel glass panel-lg" data-panel="participants" hidden>
+          <p class="eyebrow">Participant Directory</p>
+          <div class="admin-table-wrap" style="margin-top:1rem">
+            <table class="rank-table" id="participantTable">
+              <thead><tr><th>Name</th><th>Handle</th><th>Dept</th><th>Level</th><th>Score</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-panel glass panel-lg" data-panel="leaderboard" hidden>
+          <p class="eyebrow">Leaderboard Controls</p>
+          <p class="muted" style="margin:0.75rem 0 1rem">Recalculate ranks, freeze board, or adjust score corrections.</p>
+          <div class="row">
+            <button class="btn btn-primary" type="button" id="recalcBtn">Recalculate Ranks</button>
+            <button class="btn btn-ghost" type="button" id="freezeBtn">Freeze Board</button>
+          </div>
+          <p class="field-hint" id="lbAdminMsg" style="margin-top:1rem"></p>
+          <div class="admin-table-wrap" style="margin-top:1rem">
+            <table class="rank-table">
+              <thead><tr><th>Rank</th><th>User</th><th>Score</th><th>Action</th></tr></thead>
+              <tbody id="adminLb"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-panel glass panel-lg" data-panel="submissions" hidden>
+          <p class="eyebrow">Submission Review</p>
+          <div class="admin-table-wrap" style="margin-top:1rem">
+            <table class="rank-table" id="subTable">
+              <thead><tr><th>Time</th><th>User</th><th>Mission</th><th>Flag</th><th>Status</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="js/core.js"></script>
+  <script src="js/selects.js"></script>
+  <script src="js/supabase-auth.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
