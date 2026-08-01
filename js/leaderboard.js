@@ -23,12 +23,23 @@
     }));
 
     const self = rows.find((r) => r.self);
-    document.getElementById("youRank").textContent = self ? `#${self.rank}` : rows.length ? "—" : "#—";
-    document.getElementById("youMeta").textContent = self
-      ? `${self.score.toLocaleString()} XP · ${self.missions}/9 missions`
-      : me
-        ? "Complete onboarded missions to appear"
-        : "Sign in to track your rank";
+    const meLocal = ACC.loadUser();
+    const excludedSelf = meLocal.leaderboardEligible === false;
+
+    document.getElementById("youRank").textContent = excludedSelf
+      ? "N/A"
+      : self
+        ? `#${self.rank}`
+        : rows.length
+          ? "—"
+          : "#—";
+    document.getElementById("youMeta").textContent = excludedSelf
+      ? "This account is excluded from the leaderboard (test)"
+      : self
+        ? `${self.score.toLocaleString()} XP · ${self.missions}/9 missions`
+        : me
+          ? "Complete onboarded missions to appear"
+          : "Sign in to track your rank";
 
     if (self && self.rank > 10) {
       const card = document.getElementById("selfCard");

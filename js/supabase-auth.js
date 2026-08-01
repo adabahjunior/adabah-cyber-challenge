@@ -189,6 +189,7 @@ function profileToLocal(profile, session) {
     competitionCompletedAt: profile?.competition_completed_at || null,
     certificateId: profile?.certificate_id || null,
     awards: profile?.awards || [],
+    leaderboardEligible: profile?.leaderboard_eligible !== false,
     onboarded: Boolean(profile?.onboarded_at),
     isAdmin: isAdminEmail(profile?.email || session?.user?.email),
   };
@@ -218,16 +219,23 @@ async function requireAdmin() {
   return synced;
 }
 
-async function listParticipants() {
+async function listParticipants({ includeExcluded = false } = {}) {
   const supabase = await getClient();
+
+  if (includeExcluded) {
+    const adminList = await supabase.rpc("acc_admin_list_participants");
+    if (!adminList.error && adminList.data) return adminList.data;
+  }
+
   const ranked = await supabase.rpc("acc_ranked_participants");
   if (!ranked.error && ranked.data) {
     return ranked.data;
   }
-  const { data, error } = await supabase
+
+  let query = supabase
     .from("acc_profiles")
     .select(
-      "id, email, full_name, department, level, username, hacker_name, avatar, avatar_style, portrait_url, whatsapp, score, rank, progress, warnings, completed_missions, total_time_sec, hints_used, final_mission_score, competition_completed_at, certificate_id, awards, onboarded_at, created_at"
+      "id, email, full_name, department, level, username, hacker_name, avatar, avatar_style, portrait_url, whatsapp, score, rank, progress, warnings, completed_missions, total_time_sec, hints_used, final_mission_score, competition_completed_at, certificate_id, awards, leaderboard_eligible, onboarded_at, created_at"
     )
     .not("onboarded_at", "is", null)
     .order("score", { ascending: false })
@@ -235,24 +243,53 @@ async function listParticipants() {
     .order("total_time_sec", { ascending: true })
     .order("hints_used", { ascending: true })
     .order("created_at", { ascending: true });
+
+  if (!includeExcluded) {
+    query = query.eq("leaderboard_eligible", true);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return data || [];
 }
 
 function rankParticipants(rows) {
-  return (rows || []).map((row, index) => ({
-    ...row,
-    computed_rank: Number(row.computed_rank || index + 1),
-    handle: row.hacker_name || row.username || "student",
-    missions: Array.isArray(row.completed_missions) ? row.completed_missions.length : 0,
-    badge: ACC.badgeFor?.(row.score || 0, Array.isArray(row.completed_missions) ? row.completed_missions.length : 0) || "Recruit",
-    awardLabels: (row.awards || []).map((a) => (window.ACCComp?.AWARDS?.[a]?.title) || a),
-  }));
+  return (rows || []).map((row, index) => {
+    const eligible = row.leaderboard_eligible !== false;
+    const missions = Array.isArray(row.completed_missions) ? row.completed_missions.length : 0;
+    return {
+      ...row,
+      leaderboard_eligible: eligible,
+      computed_rank: eligible
+        ? Number(row.computed_rank || row.rank || index + 1)
+        : null,
+      handle: row.hacker_name || row.username || "student",
+      missions,
+      badge: ACC.badgeFor?.(row.score || 0, missions) || "Recruit",
+      awardLabels: (row.awards || []).map((a) => (window.ACCComp?.AWARDS?.[a]?.title) || a),
+    };
+  });
 }
 
 async function listLeaderboard() {
-  const rows = await listParticipants();
+  const rows = await listParticipants({ includeExcluded: false });
   return rankParticipants(rows);
+}
+
+async function listAdminParticipants() {
+  const rows = await listParticipants({ includeExcluded: true });
+  return rankParticipants(rows);
+}
+
+async function setLeaderboardEligible(userId, eligible) {
+  if (!(await isAdmin())) throw new Error("Admin access required");
+  const supabase = await getClient();
+  const { data, error } = await supabase.rpc("acc_set_leaderboard_eligible", {
+    p_user_id: userId,
+    p_eligible: Boolean(eligible),
+  });
+  if (error) throw error;
+  return data;
 }
 
 async function recordMissionComplete({ missionId, score = 0, elapsedSec = 0, hintsUsed = 0 }) {
@@ -653,6 +690,8 @@ window.ACCAuth = {
   resolvePostAuthPath,
   listParticipants,
   listLeaderboard,
+  listAdminParticipants,
+  setLeaderboardEligible,
   listMissions,
   listActiveMissions,
   updateMission,

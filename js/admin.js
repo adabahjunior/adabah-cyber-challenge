@@ -54,10 +54,13 @@
     const status = document.getElementById("participantStatusFilter")?.value || "";
     return allParticipants.filter((row) => {
       const missions = row.missions || 0;
+      const eligible = row.leaderboard_eligible !== false;
       if (dept && row.department !== dept) return false;
       if (status === "completed" && missions < 9) return false;
       if (status === "active" && (missions < 1 || missions >= 9)) return false;
       if (status === "new" && missions > 0) return false;
+      if (status === "excluded" && eligible) return false;
+      if (status === "eligible" && !eligible) return false;
       if (!q) return true;
       const hay = `${row.full_name || ""} ${row.handle || ""} ${row.email || ""} ${row.username || ""}`.toLowerCase();
       return hay.includes(q);
@@ -69,12 +72,14 @@
     const pt = document.querySelector("#participantTable tbody");
     pt.innerHTML = "";
     if (!rows.length) {
-      pt.innerHTML = `<tr><td colspan="10" class="muted">No matching participants.</td></tr>`;
+      pt.innerHTML = `<tr><td colspan="11" class="muted">No matching participants.</td></tr>`;
       return;
     }
     rows.forEach((row) => {
       const tr = document.createElement("tr");
       const canDownload = Boolean(row.portrait_url);
+      const eligible = row.leaderboard_eligible !== false;
+      if (!eligible) tr.style.opacity = "0.72";
       tr.innerHTML = `
         <td>${portraitCell(row)}</td>
         <td>
@@ -83,9 +88,17 @@
         </td>
         <td class="mono">${escapeHtml(row.handle)}</td>
         <td>${escapeHtml(row.department || "—")}</td>
-        <td class="mono">#${row.computed_rank || "—"}</td>
+        <td class="mono">${eligible && row.computed_rank ? `#${row.computed_rank}` : "—"}</td>
         <td class="mono">${Number(row.score || 0).toLocaleString()}</td>
         <td class="mono">${row.missions || 0}/9</td>
+        <td>
+          <button class="btn btn-sm ${eligible ? "btn-ghost" : "btn-primary"}" type="button"
+            data-toggle-leaderboard="${escapeHtml(row.id)}"
+            data-eligible="${eligible ? "1" : "0"}"
+            title="${eligible ? "Exclude test account from leaderboard" : "Restore to leaderboard"}">
+            ${eligible ? "On board" : "Excluded"}
+          </button>
+        </td>
         <td class="mono dim">${row.certificate_id ? "Issued" : "—"}</td>
         <td>
           <button class="btn btn-ghost btn-sm" type="button" data-download-portrait ${canDownload ? "" : "disabled"}
@@ -102,7 +115,10 @@
   function renderLeaderboard(rows) {
     const adminLb = document.getElementById("adminLb");
     adminLb.innerHTML = "";
-    rows.slice(0, 25).forEach((row) => {
+    rows
+      .filter((row) => row.leaderboard_eligible !== false)
+      .slice(0, 25)
+      .forEach((row) => {
       const tr = document.createElement("tr");
       if (row.computed_rank <= 3) tr.classList.add("top");
       tr.innerHTML = `
@@ -220,10 +236,11 @@
   function fillCertSelect(rows) {
     const sel = document.getElementById("certParticipant");
     if (!sel) return;
-    sel.innerHTML = rows
+    const eligible = rows.filter((r) => r.leaderboard_eligible !== false);
+    sel.innerHTML = eligible
       .map((r) => `<option value="${escapeHtml(r.id)}">#${r.computed_rank} · @${escapeHtml(r.handle)} · ${escapeHtml(r.full_name || "")}</option>`)
       .join("");
-    selectedCertId = rows[0]?.id || null;
+    selectedCertId = eligible[0]?.id || null;
   }
 
   function currentCertParticipant() {
@@ -271,11 +288,12 @@
     const msg = document.getElementById("lbAdminMsg");
     try {
       await ACCAuth.refreshAwards().catch(() => null);
-      const rows = await ACCAuth.listLeaderboard();
-      allParticipants = rows;
-      renderLeaderboard(rows);
+      allParticipants = await ACCAuth.listAdminParticipants();
+      renderLeaderboard(allParticipants);
       renderParticipants();
-      msg.textContent = `Ranks refreshed from ${rows.length} participants.`;
+      fillCertSelect(allParticipants);
+      const live = allParticipants.filter((p) => p.leaderboard_eligible !== false).length;
+      msg.textContent = `Ranks refreshed · ${live} on leaderboard · ${allParticipants.length - live} excluded.`;
     } catch (err) {
       msg.textContent = err.message || "Could not refresh ranks.";
     }
@@ -284,6 +302,7 @@
   document.getElementById("exportResultsBtn")?.addEventListener("click", () => {
     const header = "rank,username,full_name,department,score,missions,time_sec,certificate_id\n";
     const lines = allParticipants
+      .filter((r) => r.leaderboard_eligible !== false)
       .map(
         (r) =>
           `${r.computed_rank},${r.handle},"${(r.full_name || "").replace(/"/g, '""')}",${r.department || ""},${r.score || 0},${r.missions || 0},${r.total_time_sec || 0},${r.certificate_id || ""}`
@@ -311,10 +330,11 @@
     const msg = document.getElementById("overviewMsg");
     try {
       await ACCAuth.refreshAwards();
-      allParticipants = await ACCAuth.listLeaderboard();
+      allParticipants = await ACCAuth.listAdminParticipants();
       renderParticipants();
+      renderLeaderboard(allParticipants);
       fillCertSelect(allParticipants);
-      msg.textContent = "Awards recalculated from current standings.";
+      msg.textContent = "Awards recalculated from current standings (test accounts excluded).";
     } catch (err) {
       msg.textContent = err.message || "Could not refresh awards.";
     }
@@ -359,6 +379,36 @@
   });
 
   document.getElementById("participantTable")?.addEventListener("click", async (e) => {
+    const toggleLb = e.target.closest("[data-toggle-leaderboard]");
+    if (toggleLb) {
+      const id = toggleLb.dataset.toggleLeaderboard;
+      const currentlyEligible = toggleLb.dataset.eligible === "1";
+      const nextEligible = !currentlyEligible;
+      const label = currentlyEligible
+        ? "Exclude this account from the public leaderboard? Use this for test accounts."
+        : "Restore this account to the public leaderboard?";
+      if (!confirm(label)) return;
+      toggleLb.disabled = true;
+      try {
+        await ACCAuth.setLeaderboardEligible(id, nextEligible);
+        allParticipants = await ACCAuth.listAdminParticipants();
+        renderParticipants();
+        renderLeaderboard(allParticipants);
+        fillCertSelect(allParticipants);
+        const stats = await ACCAuth.getCompetitionStats();
+        document.getElementById("statLeader").textContent = stats.totals.leader
+          ? `@${stats.totals.leader.handle}`
+          : "—";
+        document.getElementById("statParticipants").textContent = String(
+          allParticipants.filter((p) => p.leaderboard_eligible !== false).length
+        );
+      } catch (err) {
+        alert(err.message || "Could not update leaderboard eligibility.");
+        toggleLb.disabled = false;
+      }
+      return;
+    }
+
     const dossier = e.target.closest("[data-open-dossier]");
     if (dossier) {
       const row = allParticipants.find((p) => p.id === dossier.dataset.openDossier);
@@ -367,11 +417,20 @@
       if (!row) return;
       box.hidden = false;
       const runs = allRuns.filter((r) => r.user_id === row.id);
+      const eligible = row.leaderboard_eligible !== false;
       body.innerHTML = `
         <div class="mono" style="margin-top:.5rem">${escapeHtml(row.full_name || "—")} · @${escapeHtml(row.handle)}</div>
-        <div class="muted">${escapeHtml(row.department || "—")} · Rank #${row.computed_rank} · ${Number(row.score || 0).toLocaleString()} XP</div>
+        <div class="muted">${escapeHtml(row.department || "—")} · Rank ${eligible && row.computed_rank ? `#${row.computed_rank}` : "—"} · ${Number(row.score || 0).toLocaleString()} XP</div>
         <div class="muted" style="margin-top:.35rem">Hints: ${row.hints_used || 0} · Time: ${ACC.formatDuration(row.total_time_sec || 0)} · Cert: ${escapeHtml(row.certificate_id || "not issued")}</div>
         <div class="muted" style="margin-top:.35rem">Awards: ${(row.awards || []).join(", ") || "none"}</div>
+        <div class="row" style="margin-top:.75rem;gap:.5rem;flex-wrap:wrap;align-items:center">
+          <span class="badge ${eligible ? "badge-green" : "badge-locked"}">${eligible ? "On leaderboard" : "Excluded (test)"}</span>
+          <button class="btn btn-sm ${eligible ? "btn-ghost" : "btn-primary"}" type="button"
+            data-toggle-leaderboard="${escapeHtml(row.id)}"
+            data-eligible="${eligible ? "1" : "0"}">
+            ${eligible ? "Exclude from leaderboard" : "Restore to leaderboard"}
+          </button>
+        </div>
         <div class="admin-table-wrap" style="margin-top:.75rem">
           <table class="rank-table">
             <thead><tr><th>Mission</th><th>Score</th><th>Time</th><th>Hints</th><th>Completed</th></tr></thead>
@@ -454,15 +513,51 @@
     }
   });
 
+  document.getElementById("participantDetail")?.addEventListener("click", async (e) => {
+    const toggleLb = e.target.closest("[data-toggle-leaderboard]");
+    if (!toggleLb) return;
+    const id = toggleLb.dataset.toggleLeaderboard;
+    const currentlyEligible = toggleLb.dataset.eligible === "1";
+    const nextEligible = !currentlyEligible;
+    const label = currentlyEligible
+      ? "Exclude this account from the public leaderboard? Use this for test accounts."
+      : "Restore this account to the public leaderboard?";
+    if (!confirm(label)) return;
+    toggleLb.disabled = true;
+    try {
+      await ACCAuth.setLeaderboardEligible(id, nextEligible);
+      allParticipants = await ACCAuth.listAdminParticipants();
+      renderParticipants();
+      renderLeaderboard(allParticipants);
+      fillCertSelect(allParticipants);
+      const openBtn = document.querySelector(`[data-open-dossier="${id}"]`);
+      openBtn?.click();
+      const stats = await ACCAuth.getCompetitionStats();
+      document.getElementById("statLeader").textContent = stats.totals.leader
+        ? `@${stats.totals.leader.handle}`
+        : "—";
+      document.getElementById("statParticipants").textContent = String(
+        allParticipants.filter((p) => p.leaderboard_eligible !== false).length
+      );
+    } catch (err) {
+      alert(err.message || "Could not update leaderboard eligibility.");
+      toggleLb.disabled = false;
+    }
+  });
+
   (async () => {
     const gate = await ACCAuth.requireAdmin();
     if (!gate) return;
 
-    const stats = await ACCAuth.getCompetitionStats();
-    allParticipants = stats.board || [];
+    const [stats, adminRows] = await Promise.all([
+      ACCAuth.getCompetitionStats(),
+      ACCAuth.listAdminParticipants(),
+    ]);
+    allParticipants = adminRows;
     allRuns = stats.runs || [];
+    const liveCount = allParticipants.filter((p) => p.leaderboard_eligible !== false).length;
 
-    document.getElementById("statParticipants").textContent = String(stats.totals.registered);
+    document.getElementById("statParticipants").textContent = String(liveCount);
     document.getElementById("statActiveDone").textContent = `${stats.totals.active} / ${stats.totals.completed}`;
     document.getElementById("statAvgScore").textContent = String(stats.totals.avgScore);
     document.getElementById("statCleared").textContent = String(stats.totals.totalMissionCompletions);
