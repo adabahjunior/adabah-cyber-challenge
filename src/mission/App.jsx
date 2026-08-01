@@ -210,10 +210,10 @@ export default function App() {
       <div className="cyber-grid" aria-hidden="true" />
       <div className="mission-app">
         <div className="top-nav">
-          <a className="brand" href="../index.html">
+          <a className="brand" href="/">
             ADABAH <span>Cyber Challenge</span>
           </a>
-          <a className="back-link" href="../dashboard.html">
+          <a className="back-link" href="/dashboard.html">
             ← Dashboard
           </a>
         </div>

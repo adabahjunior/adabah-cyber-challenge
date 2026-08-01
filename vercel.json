@@ -1,8 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "installCommand": "npm --prefix mission-room install",
-  "buildCommand": "npm --prefix mission-room run build",
-  "cleanUrls": true,
-  "trailingSlash": false
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/mission-001", "destination": "/mission-001/index.html" },
+    { "source": "/mission-001/", "destination": "/mission-001/index.html" }
+  ]
 }

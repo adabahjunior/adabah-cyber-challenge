@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sign in | ADABAH Cyber Challenge</title>
-  <link rel="icon" href="assets/logo.svg">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" href="/assets/logo.svg">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
 </head>
 <body>
   <div class="cyber-grid" aria-hidden="true"></div>
@@ -59,10 +59,10 @@
       </div>
     </main>
   </div>
-  <script src="js/core.js?v=5"></script>
-  <script src="js/password.js?v=5"></script>
-  <script src="js/supabase-auth.js?v=5"></script>
-  <script>
+  <script type="module" src="/js/core.js"></script>
+  <script type="module" src="/js/password.js"></script>
+  <script type="module" src="/js/supabase-auth.js"></script>
+  <script type="module">
     if (!window.ACCAuth) {
       console.error("ACCAuth failed to load");
       const el = document.getElementById("loginError");

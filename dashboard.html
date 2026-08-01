@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Command Center | ADABAH Cyber Challenge</title>
-  <link rel="icon" href="assets/logo.svg">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" href="/assets/logo.svg">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
 </head>
 <body>
   <div class="cyber-grid" aria-hidden="true"></div>
@@ -110,11 +110,11 @@
       </main>
     </div>
   </div>
-  <script src="js/core.js?v=5"></script>
-  <script src="js/avatars.js?v=5"></script>
-  <script src="js/supabase-auth.js?v=5"></script>
-  <script src="js/dashboard.js?v=5"></script>
-  <script>
+  <script type="module" src="/js/core.js"></script>
+  <script type="module" src="/js/avatars.js"></script>
+  <script type="module" src="/js/supabase-auth.js"></script>
+  <script type="module" src="/js/dashboard.js"></script>
+  <script type="module">
     document.getElementById("signOutBtn")?.addEventListener("click", async () => {
       await ACCAuth.signOut();
       location.href = "login.html";

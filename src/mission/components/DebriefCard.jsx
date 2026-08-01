@@ -15,7 +15,7 @@ export default function DebriefCard({ skills, visible }) {
         ))}
       </ul>
       <div className="row" style={{ marginTop: "1.15rem" }}>
-        <a className="btn btn-primary" href="../dashboard.html">
+        <a className="btn btn-primary" href="/dashboard.html">
           Back to dashboard
         </a>
         <button

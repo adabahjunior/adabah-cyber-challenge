@@ -2,59 +2,55 @@
 
 Premium cybersecurity competition frontend for **cybercc.adabah.com**.
 
+## Stack
+
+- **Vite** multi-page app (static HTML pages + React Mission 001)
+- Supabase Auth
+
 ## Pages
 
-| Page | File |
-|------|------|
-| Landing | `index.html` |
-| Onboarding | `onboarding.html` |
-| Login | `login.html` |
-| Dashboard | `dashboard.html` |
-| Mission 001 — The Phishing Trap | `mission-001/index.html` |
-| Leaderboard | `leaderboard.html` |
-| Profile | `profile.html` |
-| Admin | `admin.html` |
+| Page | Route |
+|------|-------|
+| Landing | `/` |
+| Onboarding | `/onboarding.html` |
+| Login | `/login.html` |
+| Dashboard | `/dashboard.html` |
+| Mission 001 | `/mission-001/` |
+| Leaderboard | `/leaderboard.html` |
+| Profile | `/profile.html` |
+| Admin | `/admin.html` |
 
-## Run locally
+## Local development
 
 ```bash
-python -m http.server 5500
+npm install
+npm run dev
 ```
 
 Open http://127.0.0.1:5500/
 
-Mission 001: http://127.0.0.1:5500/mission-001/
+```bash
+npm run build    # output → dist/
+npm run preview  # preview production build
+```
 
 ## Deploy to Vercel
 
-This repo is a **static site** (not Next.js / Vite at the root). `vercel.json` sets Framework Preset to **Other**.
+Framework Preset: **Vite** (set in `vercel.json`)
 
-1. Import the GitHub repo in Vercel
-2. Leave settings as detected from `vercel.json` (do not pick Vite or Next.js)
+1. Import the GitHub repo
+2. Confirm Framework = Vite, Output = `dist`, Build = `npm run build`
 3. Deploy
 
-Build installs `mission-room` deps and outputs Mission 001 into `mission-001/`. The rest of the site is served from the repo root.
-
 ```bash
-npx vercel          # preview
-npx vercel --prod   # production
+npx vercel --prod
 ```
 
-## Mission room (React)
+## Mission room
 
-Source lives in `mission-room/` (Vite + React). Reusable components:
+React source: `src/mission/`
 
-- `MissionHeader`
-- `EvidenceCard`
-- `TaskCard`
-- `SubmissionPanel`
-- `ScoreDisplay`
-- `DebriefCard`
-
-```bash
-npm run mission:dev     # develop on :5173
-npm run mission:build   # rebuild static files into mission-001/
-```
+Reusable components: `MissionHeader`, `EvidenceCard`, `TaskCard`, `SubmissionPanel`, `ScoreDisplay`, `DebriefCard`
 
 ## Notes
 
