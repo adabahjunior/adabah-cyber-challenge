@@ -25,9 +25,12 @@ Premium cybersecurity competition frontend for **cybercc.adabah.com**.
 ```bash
 npm install
 npm run dev
+# or: npm start
 ```
 
-Open http://127.0.0.1:5500/
+Open http://127.0.0.1:5500/ and Mission 001 at http://127.0.0.1:5500/mission-001/
+
+Do **not** use `python -m http.server` for this project — Mission 001 is a React page and needs Vite.
 
 ```bash
 npm run build    # output → dist/

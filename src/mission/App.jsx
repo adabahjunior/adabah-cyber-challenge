@@ -234,10 +234,10 @@ export default function App() {
           <h2 style={{ fontSize: "1.15rem", marginBottom: "0.75rem" }}>
             {mission.caseFile.heading}
           </h2>
-          <TypewriterCase text={mission.caseFile.intro} active={started || completed} />
+          <TypewriterCase text={mission.caseFile.intro} active={started && !completed} />
           {!started && !completed && (
-            <p className="mono" style={{ color: "var(--dim)", fontSize: "0.82rem" }}>
-              Press Start Investigation to open the case file.
+            <p className="mono" style={{ color: "var(--dim)", fontSize: "0.82rem", marginTop: "0.75rem" }}>
+              Press Start Investigation to begin the timer and unlock tasks.
             </p>
           )}
         </section>

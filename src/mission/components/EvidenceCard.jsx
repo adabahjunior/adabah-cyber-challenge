@@ -152,10 +152,10 @@ function FakeHeaders() {
 }
 
 export function TypewriterCase({ text, active }) {
-  const [out, setOut] = useState("");
+  const [out, setOut] = useState(text);
   useEffect(() => {
     if (!active) {
-      setOut("");
+      setOut(text);
       return;
     }
     let i = 0;
@@ -169,7 +169,7 @@ export function TypewriterCase({ text, active }) {
   }, [text, active]);
 
   return (
-    <p className="muted" style={{ minHeight: "6.5em" }}>
+    <p className="muted" style={{ minHeight: "4.5em" }}>
       {out}
       {active && out.length < text.length ? <span className="cursor-blink" /> : null}
     </p>

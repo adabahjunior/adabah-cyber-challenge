@@ -8,9 +8,47 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+    <style>
+      html, body { margin: 0; background: #000; color: #f4f4f5; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+      .boot { max-width: 36rem; margin: 4rem auto; padding: 1.5rem; border: 1px solid rgba(176,0,32,.45); border-radius: 14px; background: #070707; }
+      .boot h1 { font-family: Orbitron, system-ui, sans-serif; font-size: 1.1rem; color: #e01136; letter-spacing: .06em; }
+      .boot pre { background: #111; padding: 1rem; border-radius: 8px; overflow: auto; }
+      .boot a { color: #e01136; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot">
+        <h1>MISSION 001</h1>
+        <p>Booting investigation room…</p>
+      </div>
+    </div>
     <script type="module" src="/src/mission/main.jsx"></script>
+    <script type="module">
+      // Surface load failures when the page is opened without Vite
+      window.addEventListener("error", (event) => {
+        const root = document.getElementById("root");
+        if (!root || root.querySelector(".mission-app")) return;
+        const msg = event?.message || "Module failed to load";
+        if (!/Failed to fetch|Loading module|MIME|jsx|Unexpected token/i.test(msg) && root.querySelector(".mission-app, .glass")) return;
+        root.innerHTML = `
+          <div class="boot">
+            <h1>Mission room failed to load</h1>
+            <p>Use Vite to run this project:</p>
+            <pre>npm install\nnpm run dev</pre>
+            <p>Then open <a href="/mission-001/">/mission-001/</a></p>
+            <p style="color:#71717a;font-size:.85rem">${msg}</p>
+          </div>`;
+      });
+      setTimeout(() => {
+        const root = document.getElementById("root");
+        if (root && !root.querySelector(".mission-app") && root.querySelector(".boot")) {
+          const p = root.querySelector(".boot p");
+          if (p && /Booting/.test(p.textContent || "")) {
+            p.textContent = "Still loading… if this persists, run npm run dev and hard-refresh.";
+          }
+        }
+      }, 4000);
+    </script>
   </body>
 </html>
