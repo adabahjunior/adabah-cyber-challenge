@@ -18,6 +18,7 @@
     progress: 0,
     completed: [],
     warnings: 0,
+    isAdmin: false,
   });
 
   function loadUser() {
@@ -141,23 +142,13 @@
       .replace(/^OK (.*)$/, '<span class="ok">OK</span> $1');
   }
 
-  const LEADERBOARD = [
-    { rank: 1, user: "shadowroot", score: 4820, missions: 10, badge: "Elite" },
-    { rank: 2, user: "packetwitch", score: 4510, missions: 9, badge: "Elite" },
-    { rank: 3, user: "nullsector", score: 4200, missions: 9, badge: "Pro" },
-    { rank: 4, user: "cipherkid", score: 3890, missions: 8, badge: "Pro" },
-    { rank: 5, user: "redops_gh", score: 3605, missions: 8, badge: "Pro" },
-    { rank: 6, user: "vaultbreaker", score: 3340, missions: 7, badge: "Rising" },
-    { rank: 7, user: "hexwalker", score: 3120, missions: 7, badge: "Rising" },
-    { rank: 8, user: "tracezero", score: 2980, missions: 6, badge: "Rising" },
-    { rank: 9, user: "bitstorm", score: 2755, missions: 6, badge: "Operative" },
-    { rank: 10, user: "ghostline", score: 2510, missions: 5, badge: "Operative" },
-    { rank: 11, user: "netphantom", score: 2340, missions: 5, badge: "Operative" },
-    { rank: 12, user: "payloadx", score: 2100, missions: 4, badge: "Operative" },
-    { rank: 13, user: "fwbypass", score: 1880, missions: 4, badge: "Recruit" },
-    { rank: 14, user: "you", score: 1250, missions: 3, badge: "Recruit", self: true },
-    { rank: 15, user: "scanbot", score: 980, missions: 2, badge: "Recruit" },
-  ];
+  function badgeFor(score, missions) {
+    if (score >= 4000 || missions >= 9) return "Elite";
+    if (score >= 3000 || missions >= 7) return "Pro";
+    if (score >= 2000 || missions >= 5) return "Rising";
+    if (score >= 500 || missions >= 2) return "Operative";
+    return "Recruit";
+  }
 
   const MISSIONS = {
     1: [
@@ -188,7 +179,7 @@
     initReveal,
     startCountdown,
     typeTerminal,
-    LEADERBOARD,
+    badgeFor,
     MISSIONS,
   };
 

@@ -68,7 +68,7 @@
       <div class="stat-grid reveal">
         <div class="glass panel stat-card">
           <div class="label">Students joined</div>
-          <div class="value accent" data-count="1248">0</div>
+          <div class="value accent" id="statJoined">0</div>
         </div>
         <div class="glass panel stat-card">
           <div class="label">Challenges</div>
@@ -76,7 +76,7 @@
         </div>
         <div class="glass panel stat-card">
           <div class="label">Tasks finished</div>
-          <div class="value accent" data-count="3864">0</div>
+          <div class="value accent" id="statCleared">0</div>
         </div>
         <div class="glass panel stat-card">
           <div class="label">Length</div>
@@ -132,28 +132,33 @@
   </div>
 
   <script type="module" src="/js/core.js"></script>
+  <script type="module" src="/js/supabase-auth.js"></script>
   <script type="module">
     document.getElementById("year").textContent = new Date().getFullYear();
     const end = Date.now() + 18 * 86400000 + 5 * 3600000;
     ACC.startCountdown(document.getElementById("countdown"), end);
-    ACC.typeTerminal(document.getElementById("heroTerminal"), [
-      "$ checking challenge status",
-      "OK season 1 is open",
-      "$ students online",
-      "OK 1248 joined so far",
-      "$ week 1 challenges",
-      "OK ready when you are_"
-    ]);
-    document.querySelectorAll("[data-count]").forEach((el) => {
-      const target = Number(el.dataset.count);
-      let n = 0;
-      const step = Math.ceil(target / 48);
-      const t = setInterval(() => {
-        n = Math.min(target, n + step);
-        el.textContent = n.toLocaleString();
-        if (n >= target) clearInterval(t);
-      }, 30);
-    });
+
+    (async () => {
+      let joined = 0;
+      let cleared = 0;
+      try {
+        const rows = await ACCAuth.listLeaderboard();
+        joined = rows.length;
+        cleared = rows.reduce((sum, r) => sum + (r.missions || 0), 0);
+      } catch (err) {
+        console.warn(err);
+      }
+      document.getElementById("statJoined").textContent = joined.toLocaleString();
+      document.getElementById("statCleared").textContent = cleared.toLocaleString();
+      ACC.typeTerminal(document.getElementById("heroTerminal"), [
+        "$ checking challenge status",
+        "OK season 1 is open",
+        "$ students registered",
+        `OK ${joined} joined so far`,
+        "$ week 1 challenges",
+        "OK ready when you are_"
+      ]);
+    })();
   </script>
 </body>
 </html>

@@ -102,21 +102,29 @@
       document.getElementById("pWarn").textContent = `${user.warnings || 0}/3`;
       document.getElementById("pProg").textContent = `${user.progress || 0}%`;
 
+      let myRank = null;
+      try {
+        const board = await ACCAuth.listLeaderboard();
+        const me = board.find((r) => r.email && user.email && r.email.toLowerCase() === user.email.toLowerCase());
+        if (me) {
+          myRank = me.computed_rank;
+          document.getElementById("pRank").textContent = `Rank #${me.computed_rank}`;
+        }
+      } catch (_) {}
+
       const achievements = [
         { icon: "⚑", name: "First win", on: (user.completed || []).length > 0 },
-        { icon: "◈", name: "Getting started", on: (user.completed || []).includes("M01") },
-        { icon: "⚡", name: "Fast finish", on: false },
-        { icon: "🛡", name: "Team defender", on: false },
-        { icon: "♛", name: "Top 10", on: false },
-        { icon: "♾", name: "Perfect week", on: false },
-      ];
+        { icon: "◈", name: "Phishing Trap", on: (user.completed || []).includes("M01") },
+        { icon: "♟", name: "Footprint Analysis", on: (user.completed || []).includes("M02") },
+        { icon: "♛", name: "Top 10", on: myRank !== null && myRank <= 10 },
+      ].filter((a) => a.on || ["First win", "Phishing Trap"].includes(a.name));
       document.getElementById("achievements").innerHTML = achievements.map((a) => `
         <div class="achievement ${a.on ? "" : "locked"}">
           <div class="icon">${a.icon}</div>
           <div class="mono" style="font-size:.8rem">${a.name}</div>
         </div>`).join("");
 
-      const names = { M01: "Recon Protocol", M02: "Footprint Analysis" };
+      const names = { M01: "The Phishing Trap", M02: "Footprint Analysis" };
       const list = document.getElementById("completedList");
       list.innerHTML = "";
       (user.completed || []).forEach((id) => {

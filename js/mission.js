@@ -9,7 +9,7 @@
     "OK looking good_",
   ], 14);
 
-  // 45 minute demo timer (accelerated visual: 45:00 counting real seconds but from 45 min)
+  // 45 minute mission timer
   let remaining = 45 * 60;
   const total = remaining;
   const timerEl = document.getElementById("missionTimer");
@@ -29,9 +29,9 @@
     e.preventDefault();
     const flag = document.getElementById("flag").value.trim();
     const msg = document.getElementById("flagMsg");
-    if (flag === "ACC{footprint_mapped}" || flag.toLowerCase().includes("acc{")) {
+    if (flag === "ACC{footprint_mapped}") {
       msg.style.color = "var(--success)";
-      msg.textContent = "Correct! +150 points added (demo)";
+      msg.textContent = "Correct! +150 points added.";
       const u = ACC.loadUser();
       if (!u.completed.includes("M02")) {
         u.completed.push("M02");

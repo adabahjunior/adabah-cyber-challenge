@@ -1,4 +1,11 @@
 (() => {
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
   const tabs = document.getElementById("adminTabs");
   const panels = [...document.querySelectorAll(".admin-panel")];
 
@@ -12,82 +19,164 @@
     });
   });
 
-  document.getElementById("missionCreate").addEventListener("submit", (e) => {
+  document.getElementById("missionCreate")?.addEventListener("submit", (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     document.getElementById("missionMsg").textContent =
-      `Mission ${fd.get("id")} “${fd.get("title")}” queued for Week ${fd.get("week")} (UI demo — not persisted to server).`;
+      `Draft saved locally for ${fd.get("id")} “${fd.get("title")}”. Publishing to the live mission list is not enabled yet.`;
     e.target.reset();
   });
 
   const drop = document.getElementById("dropzone");
   const input = document.getElementById("fileInput");
   const fileList = document.getElementById("fileList");
-  drop.addEventListener("click", () => input.click());
-  drop.addEventListener("dragover", (e) => e.preventDefault());
-  drop.addEventListener("drop", (e) => {
+  drop?.addEventListener("click", () => input.click());
+  drop?.addEventListener("dragover", (e) => e.preventDefault());
+  drop?.addEventListener("drop", (e) => {
     e.preventDefault();
     addFiles(e.dataTransfer.files);
   });
-  input.addEventListener("change", () => addFiles(input.files));
+  input?.addEventListener("change", () => addFiles(input.files));
   function addFiles(files) {
     [...files].forEach((f) => {
       const li = document.createElement("li");
-      li.textContent = `${f.name} · ${(f.size / 1024).toFixed(1)} KB`;
+      li.textContent = `${f.name} · ${(f.size / 1024).toFixed(1)} KB (local only — not uploaded yet)`;
       fileList.appendChild(li);
     });
   }
 
-  const participants = [
-    { name: "Ama Mensah", handle: "shadowroot", dept: "Cybersecurity", level: "Advanced", score: 4820 },
-    { name: "Kojo Asante", handle: "packetwitch", dept: "Computer Science", level: "Advanced", score: 4510 },
-    { name: "Efua Boateng", handle: "nullsector", dept: "IT", level: "Intermediate", score: 4200 },
-    { name: "Yaw Owusu", handle: "cipherkid", dept: "Computer Engineering", level: "Intermediate", score: 3890 },
-    { name: "Demo User", handle: ACC.loadUser().hackerName || "operative", dept: ACC.loadUser().department || "ACC", level: ACC.loadUser().level || "Beginner", score: ACC.loadUser().score || 1250 },
-  ];
-  const pt = document.querySelector("#participantTable tbody");
-  participants.forEach((p) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${p.name}</td><td class="mono">${p.handle}</td><td>${p.dept}</td><td>${p.level}</td><td class="mono">${p.score.toLocaleString()}</td>`;
-    pt.appendChild(tr);
+  document.getElementById("recalcBtn")?.addEventListener("click", async () => {
+    const msg = document.getElementById("lbAdminMsg");
+    try {
+      const rows = await ACCAuth.listLeaderboard();
+      renderLeaderboard(rows);
+      msg.textContent = `Ranks refreshed from ${rows.length} registered participant${rows.length === 1 ? "" : "s"}.`;
+    } catch (err) {
+      msg.textContent = err.message || "Could not refresh ranks.";
+    }
   });
 
-  const adminLb = document.getElementById("adminLb");
-  ACC.LEADERBOARD.slice(0, 8).forEach((r) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td class="rank">#${r.rank}</td><td class="mono">${r.user}</td><td class="mono">${r.score}</td><td><button class="btn btn-ghost btn-sm" type="button">Adjust</button></td>`;
-    adminLb.appendChild(tr);
+  document.getElementById("freezeBtn")?.addEventListener("click", () => {
+    document.getElementById("lbAdminMsg").textContent =
+      "Board freeze is not connected yet. Ranks currently always follow live scores.";
   });
 
-  document.getElementById("recalcBtn").addEventListener("click", () => {
-    document.getElementById("lbAdminMsg").textContent = "Ranks recalculated from submission ledger (demo).";
-  });
-  document.getElementById("freezeBtn").addEventListener("click", () => {
-    document.getElementById("lbAdminMsg").textContent = "Leaderboard frozen. Score writes paused (demo).";
+  function portraitCell(row) {
+    if (row.portrait_url) {
+      return `<img class="admin-portrait" src="${escapeHtml(row.portrait_url)}" alt="${escapeHtml(row.full_name || row.handle)}">`;
+    }
+    return `<span class="avatar">${escapeHtml(ACC.initials(row.full_name || row.handle))}</span>`;
+  }
+
+  function renderParticipants(rows) {
+    const pt = document.querySelector("#participantTable tbody");
+    pt.innerHTML = "";
+    if (!rows.length) {
+      pt.innerHTML = `<tr><td colspan="8" class="muted">No registered participants yet.</td></tr>`;
+      return;
+    }
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      const joined = row.onboarded_at
+        ? new Date(row.onboarded_at).toLocaleDateString()
+        : "—";
+      const canDownload = Boolean(row.portrait_url);
+      tr.innerHTML = `
+        <td>${portraitCell(row)}</td>
+        <td>
+          <div>${escapeHtml(row.full_name || "—")}</div>
+          <div class="mono dim" style="font-size:.75rem">${escapeHtml(row.email || "")}</div>
+        </td>
+        <td class="mono">${escapeHtml(row.handle)}</td>
+        <td>${escapeHtml(row.department || "—")}</td>
+        <td>${escapeHtml(row.level || "—")}</td>
+        <td class="mono">${escapeHtml(row.whatsapp || "—")}</td>
+        <td class="mono">${Number(row.score || 0).toLocaleString()}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" type="button" data-download-portrait ${canDownload ? "" : "disabled"}
+            data-url="${escapeHtml(row.portrait_url || "")}"
+            data-name="${escapeHtml((row.handle || row.username || row.id || "participant") + "-portrait")}">
+            ${canDownload ? "Download JPG" : "No photo"}
+          </button>
+        </td>
+        <td class="mono dim">${joined}</td>`;
+      pt.appendChild(tr);
+    });
+  }
+
+  function renderLeaderboard(rows) {
+    const adminLb = document.getElementById("adminLb");
+    adminLb.innerHTML = "";
+    if (!rows.length) {
+      adminLb.innerHTML = `<tr><td colspan="4" class="muted">No scores yet.</td></tr>`;
+      return;
+    }
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="rank">#${row.computed_rank}</td>
+        <td>
+          <span class="user-chip">
+            ${row.portrait_url ? `<img class="avatar has-photo" src="${escapeHtml(row.portrait_url)}" alt="">` : `<span class="avatar">${escapeHtml(ACC.initials(row.handle))}</span>`}
+            <span class="mono">${escapeHtml(row.handle)}</span>
+          </span>
+        </td>
+        <td class="mono">${Number(row.score || 0).toLocaleString()}</td>
+        <td><span class="badge badge-red">${escapeHtml(row.badge)}</span></td>`;
+      adminLb.appendChild(tr);
+    });
+  }
+
+  function renderSubmissionsEmpty() {
+    const st = document.querySelector("#subTable tbody");
+    if (st) {
+      st.innerHTML = `<tr><td colspan="6" class="muted">No flag submissions stored yet.</td></tr>`;
+    }
+  }
+
+  document.getElementById("participantTable")?.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-download-portrait]");
+    if (!btn || btn.disabled) return;
+    const url = btn.dataset.url;
+    const name = btn.dataset.name || "portrait";
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Preparing…";
+    try {
+      await ACCAuth.downloadPortraitAsJpg(url, `${name}.jpg`);
+      btn.textContent = "Downloaded";
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.disabled = false;
+      }, 1200);
+    } catch (err) {
+      btn.textContent = "Failed";
+      alert(err.message || "Could not download portrait as JPG.");
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.disabled = false;
+      }, 1200);
+    }
   });
 
-  const subs = [
-    { t: "02:14:08", u: "shadowroot", m: "M03", f: "ACC{phish_net}", s: "Accepted" },
-    { t: "02:11:44", u: "packetwitch", m: "M02", f: "ACC{bad}", s: "Rejected" },
-    { t: "02:09:12", u: "nullsector", m: "M01", f: "ACC{recon_ok}", s: "Accepted" },
-    { t: "02:03:55", u: "cipherkid", m: "M02", f: "ACC{footprint_mapped}", s: "Pending" },
-  ];
-  const st = document.querySelector("#subTable tbody");
-  subs.forEach((s) => {
-    const tr = document.createElement("tr");
-    const badge =
-      s.s === "Accepted"
-        ? "badge-green"
-        : s.s === "Rejected"
-          ? "badge-red"
-          : "badge-yellow";
-    tr.innerHTML = `
-      <td class="mono">${s.t}</td>
-      <td class="mono">${s.u}</td>
-      <td class="mono">${s.m}</td>
-      <td class="code">${s.f}</td>
-      <td><span class="badge ${badge}">${s.s}</span></td>
-      <td><button class="btn btn-ghost btn-sm" type="button">Review</button></td>`;
-    st.appendChild(tr);
+  (async () => {
+    const gate = await ACCAuth.requireAdmin();
+    if (!gate) return;
+
+    const rows = await ACCAuth.listLeaderboard();
+    const cleared = rows.reduce((sum, r) => sum + (r.missions || 0), 0);
+    const withPhotos = rows.filter((r) => r.portrait_url).length;
+
+    document.getElementById("statParticipants").textContent = rows.length.toLocaleString();
+    document.getElementById("statPhotos").textContent = withPhotos.toLocaleString();
+    document.getElementById("statCleared").textContent = cleared.toLocaleString();
+    document.getElementById("statLiveMissions").textContent = "1";
+
+    renderParticipants(rows);
+    renderLeaderboard(rows);
+    renderSubmissionsEmpty();
+  })().catch((err) => {
+    console.error(err);
+    location.href = "dashboard.html";
   });
 })();

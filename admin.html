@@ -27,26 +27,66 @@
           <div>
             <p class="eyebrow">Control Plane</p>
             <h1>Administrator Dashboard</h1>
+            <p class="muted" style="margin-top:.4rem">Restricted to the ACC administrator account.</p>
           </div>
           <span class="badge badge-red">ROOT ACCESS</span>
         </div>
 
         <div class="admin-grid">
-          <div class="glass panel stat-card"><div class="label">Participants</div><div class="value accent">1,248</div></div>
-          <div class="glass panel stat-card"><div class="label">Active Missions</div><div class="value">4</div></div>
-          <div class="glass panel stat-card"><div class="label">Pending Reviews</div><div class="value">17</div></div>
-          <div class="glass panel stat-card"><div class="label">Flags Today</div><div class="value">326</div></div>
+          <div class="glass panel stat-card"><div class="label">Participants</div><div class="value accent" id="statParticipants">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Portraits uploaded</div><div class="value" id="statPhotos">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Challenges cleared</div><div class="value" id="statCleared">0</div></div>
+          <div class="glass panel stat-card"><div class="label">Live missions</div><div class="value" id="statLiveMissions">0</div></div>
         </div>
 
         <div class="admin-tabs" id="adminTabs">
-          <button class="admin-tab active" type="button" data-panel="missions">Create Missions</button>
-          <button class="admin-tab" type="button" data-panel="files">Upload Files</button>
-          <button class="admin-tab" type="button" data-panel="participants">Participants</button>
+          <button class="admin-tab active" type="button" data-panel="participants">Participants</button>
           <button class="admin-tab" type="button" data-panel="leaderboard">Leaderboard</button>
+          <button class="admin-tab" type="button" data-panel="missions">Create Missions</button>
+          <button class="admin-tab" type="button" data-panel="files">Upload Files</button>
           <button class="admin-tab" type="button" data-panel="submissions">Submissions</button>
         </div>
 
-        <section class="admin-panel glass panel-lg" data-panel="missions">
+        <section class="admin-panel glass panel-lg" data-panel="participants">
+          <p class="eyebrow">Registered students</p>
+          <p class="muted" style="margin:.5rem 0 0">Live list from Supabase onboarding. Download each uploaded portrait as JPG.</p>
+          <div class="admin-table-wrap" style="margin-top:1rem">
+            <table class="rank-table" id="participantTable">
+              <thead>
+                <tr>
+                  <th>Photo</th>
+                  <th>Name / Email</th>
+                  <th>Handle</th>
+                  <th>Dept</th>
+                  <th>Level</th>
+                  <th>WhatsApp</th>
+                  <th>Score</th>
+                  <th>Portrait</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-panel glass panel-lg" data-panel="leaderboard" hidden>
+          <p class="eyebrow">Leaderboard</p>
+          <p class="muted" style="margin:0.75rem 0 1rem">Ranks are calculated from registered participant scores.</p>
+          <div class="row">
+            <button class="btn btn-primary" type="button" id="recalcBtn">Refresh ranks</button>
+            <button class="btn btn-ghost" type="button" id="freezeBtn">Freeze board</button>
+          </div>
+          <p class="field-hint" id="lbAdminMsg" style="margin-top:1rem"></p>
+          <div class="admin-table-wrap" style="margin-top:1rem">
+            <table class="rank-table">
+              <thead><tr><th>Rank</th><th>User</th><th>Score</th><th>Badge</th></tr></thead>
+              <tbody id="adminLb"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="admin-panel glass panel-lg" data-panel="missions" hidden>
           <p class="eyebrow">New Mission</p>
           <form id="missionCreate" class="stack" style="margin-top:1rem">
             <div class="grid-2">
@@ -60,7 +100,7 @@
             </div>
             <div class="field"><label>Story</label><textarea name="story" placeholder="Mission narrative..."></textarea></div>
             <div class="field"><label>Objectives (one per line)</label><textarea name="objectives" placeholder="Enumerate targets&#10;Capture flag"></textarea></div>
-            <button class="btn btn-primary" type="submit">Publish Mission</button>
+            <button class="btn btn-primary" type="submit">Save draft</button>
             <p class="field-hint" id="missionMsg"></p>
           </form>
         </section>
@@ -68,37 +108,11 @@
         <section class="admin-panel glass panel-lg" data-panel="files" hidden>
           <p class="eyebrow">Challenge Files</p>
           <div class="dropzone" style="margin-top:1rem" id="dropzone">
-            Drop challenge archives here or click to upload<br>
-            <span class="dim">.zip · .pdf · .ovpn · max 50MB (UI demo)</span>
+            Drop challenge archives here or click to select<br>
+            <span class="dim">.zip · .pdf · .ovpn · local draft only for now</span>
             <input type="file" id="fileInput" hidden multiple>
           </div>
           <ul id="fileList" class="objective-list" style="margin-top:1rem"></ul>
-        </section>
-
-        <section class="admin-panel glass panel-lg" data-panel="participants" hidden>
-          <p class="eyebrow">Participant Directory</p>
-          <div class="admin-table-wrap" style="margin-top:1rem">
-            <table class="rank-table" id="participantTable">
-              <thead><tr><th>Name</th><th>Handle</th><th>Dept</th><th>Level</th><th>Score</th></tr></thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="admin-panel glass panel-lg" data-panel="leaderboard" hidden>
-          <p class="eyebrow">Leaderboard Controls</p>
-          <p class="muted" style="margin:0.75rem 0 1rem">Recalculate ranks, freeze board, or adjust score corrections.</p>
-          <div class="row">
-            <button class="btn btn-primary" type="button" id="recalcBtn">Recalculate Ranks</button>
-            <button class="btn btn-ghost" type="button" id="freezeBtn">Freeze Board</button>
-          </div>
-          <p class="field-hint" id="lbAdminMsg" style="margin-top:1rem"></p>
-          <div class="admin-table-wrap" style="margin-top:1rem">
-            <table class="rank-table">
-              <thead><tr><th>Rank</th><th>User</th><th>Score</th><th>Action</th></tr></thead>
-              <tbody id="adminLb"></tbody>
-            </table>
-          </div>
         </section>
 
         <section class="admin-panel glass panel-lg" data-panel="submissions" hidden>

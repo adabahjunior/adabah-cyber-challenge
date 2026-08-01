@@ -4,6 +4,8 @@ const SUPABASE_URL = "https://zxxhkhnqcilqktmyblhf.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4eGhraG5xY2lscWt0bXlibGhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODMyNjIsImV4cCI6MjA5MDM1OTI2Mn0.7MBCRen-QVFJlKi-4AL33UO6OPBwz58h72fjAwh1UnI";
 
+const ADMIN_EMAIL = "adabahjunior@gmail.com";
+
 let _client = null;
 
 async function loadSdk() {
@@ -30,6 +32,14 @@ async function getClient() {
     },
   });
   return _client;
+}
+
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function isAdminEmail(email) {
+  return normalizeEmail(email) === ADMIN_EMAIL;
 }
 
 async function getSession() {
@@ -72,6 +82,7 @@ function profileToLocal(profile, session) {
     warnings: profile?.warnings ?? 0,
     completed: profile?.completed_missions || [],
     onboarded: Boolean(profile?.onboarded_at),
+    isAdmin: isAdminEmail(profile?.email || session?.user?.email),
   };
 }
 
@@ -82,6 +93,82 @@ async function syncLocalFromCloud() {
   const local = profileToLocal(profile, session);
   ACC.saveUser(local);
   return { session, profile, local };
+}
+
+async function isAdmin() {
+  const session = await getSession();
+  return isAdminEmail(session?.user?.email);
+}
+
+async function requireAdmin() {
+  const synced = await requireCloudAuth();
+  if (!synced) return null;
+  if (!isAdminEmail(synced.session?.user?.email || synced.local?.email)) {
+    location.href = "dashboard.html";
+    return null;
+  }
+  return synced;
+}
+
+async function listParticipants() {
+  const supabase = await getClient();
+  const { data, error } = await supabase
+    .from("acc_profiles")
+    .select(
+      "id, email, full_name, department, level, username, hacker_name, avatar, avatar_style, portrait_url, whatsapp, score, rank, progress, warnings, completed_missions, onboarded_at, created_at"
+    )
+    .not("onboarded_at", "is", null)
+    .order("score", { ascending: false })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+function rankParticipants(rows) {
+  return (rows || []).map((row, index) => ({
+    ...row,
+    computed_rank: index + 1,
+    handle: row.hacker_name || row.username || "student",
+    missions: Array.isArray(row.completed_missions) ? row.completed_missions.length : 0,
+    badge: ACC.badgeFor?.(row.score || 0, Array.isArray(row.completed_missions) ? row.completed_missions.length : 0) || "Recruit",
+  }));
+}
+
+async function listLeaderboard() {
+  const rows = await listParticipants();
+  return rankParticipants(rows);
+}
+
+async function downloadPortraitAsJpg(url, filename = "portrait.jpg") {
+  if (!url) throw new Error("No portrait uploaded");
+  const cleanUrl = String(url).split("?")[0];
+  const res = await fetch(cleanUrl, { mode: "cors", cache: "no-store" });
+  if (!res.ok) throw new Error("Could not download portrait");
+  const blob = await res.blob();
+  const bitmap = await createImageBitmap(blob);
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close?.();
+
+  const jpgBlob = await new Promise((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("JPG encode failed"))), "image/jpeg", 0.92);
+  });
+
+  const safeName = String(filename || "portrait").replace(/[^\w.-]+/g, "_");
+  const finalName = safeName.toLowerCase().endsWith(".jpg") ? safeName : `${safeName}.jpg`;
+  const href = URL.createObjectURL(jpgBlob);
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = finalName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(href);
 }
 
 async function signUp({ email, password, fullName, username }) {
@@ -162,7 +249,6 @@ async function requireCloudAuth() {
   return synced;
 }
 
-// Guard: core helpers must exist before auth helpers run
 if (typeof window.ACC === "undefined") {
   console.warn("ACC core missing — load js/core.js before js/supabase-auth.js");
 }
@@ -170,6 +256,7 @@ if (typeof window.ACC === "undefined") {
 window.ACCAuth = {
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
+  ADMIN_EMAIL,
   getClient,
   getSession,
   getProfile,
@@ -180,5 +267,11 @@ window.ACCAuth = {
   uploadPortrait,
   completeOnboarding,
   requireCloudAuth,
+  requireAdmin,
+  isAdmin,
+  isAdminEmail,
+  listParticipants,
+  listLeaderboard,
+  downloadPortraitAsJpg,
   profileToLocal,
 };
