@@ -34,7 +34,7 @@ export default function MissionHeader({
         </div>
         {!started ? (
           <button className="btn btn-primary" type="button" onClick={onStart}>
-            Start Investigation
+            {mission.startLabel || "Start Investigation"}
           </button>
         ) : (
           <span className={`badge ${remaining < 300 ? "badge-red" : "badge-green"}`}>
@@ -53,7 +53,7 @@ export default function MissionHeader({
       >
         <Meta label="Mission Status" value={started ? "ACTIVE" : "STANDBY"} accent={started && pulse} />
         <Meta label="Case Number" value={mission.caseNumber} />
-        <Meta label="Category" value="SOCIAL ENGINEERING" />
+        <Meta label="Category" value={String(mission.category || "").toUpperCase()} />
         <Meta label="Points" value={String(mission.points)} />
         <Meta label="Time Remaining" value={formatTime(remaining)} accent={started} />
       </div>

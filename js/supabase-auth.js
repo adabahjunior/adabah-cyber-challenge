@@ -18,6 +18,17 @@ const DEFAULT_MISSIONS = [
     href: "mission-001/index.html",
     sort_order: 1,
   },
+  {
+    id: "M02",
+    title: "The Hidden Trail",
+    category: "Digital Forensics & OSINT",
+    difficulty: "Beginner → Intermediate",
+    points: 100,
+    week: 1,
+    active: false,
+    href: "mission-002/index.html",
+    sort_order: 2,
+  },
 ];
 
 let _client = null;
@@ -234,12 +245,16 @@ async function updateMission(id, patch) {
 async function ensureDefaultMissions() {
   if (!(await isAdmin())) return;
   const supabase = await getClient();
+  const existing = await listMissions({ includeInactive: true }).catch(() => []);
+  const have = new Set((existing || []).map((m) => m.id));
+  const missing = DEFAULT_MISSIONS.filter((m) => !have.has(m.id));
+  if (!missing.length) return;
   const { error } = await supabase.from("acc_missions").upsert(
-    DEFAULT_MISSIONS.map((m) => ({
+    missing.map((m) => ({
       ...m,
       updated_at: new Date().toISOString(),
     })),
-    { onConflict: "id", ignoreDuplicates: true }
+    { onConflict: "id" }
   );
   if (error) console.warn("Could not seed default missions", error.message);
 }

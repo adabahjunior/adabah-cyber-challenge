@@ -5,6 +5,8 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/mission-001", "destination": "/mission-001/index.html" },
-    { "source": "/mission-001/", "destination": "/mission-001/index.html" }
+    { "source": "/mission-001/", "destination": "/mission-001/index.html" },
+    { "source": "/mission-002", "destination": "/mission-002/index.html" },
+    { "source": "/mission-002/", "destination": "/mission-002/index.html" }
   ]
 }

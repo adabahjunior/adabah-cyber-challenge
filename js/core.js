@@ -162,6 +162,17 @@
       href: "mission-001/index.html",
       sort_order: 1,
     },
+    {
+      id: "M02",
+      title: "The Hidden Trail",
+      category: "Digital Forensics & OSINT",
+      difficulty: "Beginner → Intermediate",
+      points: 100,
+      week: 1,
+      active: false,
+      href: "mission-002/index.html",
+      sort_order: 2,
+    },
   ];
 
   window.ACC = {

@@ -115,6 +115,7 @@
       const achievements = [
         { icon: "⚑", name: "First win", on: (user.completed || []).length > 0 },
         { icon: "◈", name: "Phishing Trap", on: (user.completed || []).includes("M01") },
+        { icon: "🕵", name: "Hidden Trail", on: (user.completed || []).includes("M02") },
         { icon: "♛", name: "Top 10", on: myRank !== null && myRank <= 10 },
       ];
       document.getElementById("achievements").innerHTML = achievements.map((a) => `
@@ -123,7 +124,7 @@
           <div class="mono" style="font-size:.8rem">${a.name}</div>
         </div>`).join("");
 
-      const names = { M01: "The Phishing Trap" };
+      const names = { M01: "The Phishing Trap", M02: "The Hidden Trail" };
       const list = document.getElementById("completedList");
       list.innerHTML = "";
       (user.completed || []).forEach((id) => {

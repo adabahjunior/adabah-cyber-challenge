@@ -18,6 +18,7 @@ export default defineConfig({
         profile: resolve(__dirname, "profile.html"),
         admin: resolve(__dirname, "admin.html"),
         mission001: resolve(__dirname, "mission-001/index.html"),
+        mission002: resolve(__dirname, "mission-002/index.html"),
         challenges: resolve(__dirname, "challenges.html"),
       },
     },
