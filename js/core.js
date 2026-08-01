@@ -6,6 +6,7 @@
     email: "",
     department: "",
     level: "Beginner",
+    whatsapp: "",
     username: "",
     hackerName: "",
     avatar: "pulse",
@@ -160,10 +161,10 @@
 
   const MISSIONS = {
     1: [
-      { id: "M01", title: "Recon Protocol", diff: "Easy", pts: 100, status: "completed" },
+      { id: "M01", title: "The Phishing Trap", diff: "Beginner", pts: 100, status: "available", href: "mission-001/index.html" },
       { id: "M02", title: "Footprint Analysis", diff: "Easy", pts: 150, status: "available" },
-      { id: "M03", title: "Phishing Lab", diff: "Medium", pts: 200, status: "available" },
-      { id: "M04", title: "Password Fortress", diff: "Medium", pts: 250, status: "locked" },
+      { id: "M03", title: "Password Fortress", diff: "Medium", pts: 200, status: "locked" },
+      { id: "M04", title: "Inbox Intrusion", diff: "Medium", pts: 250, status: "locked" },
     ],
     2: [
       { id: "M05", title: "Web Intrusion", diff: "Medium", pts: 300, status: "locked" },

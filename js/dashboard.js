@@ -40,11 +40,16 @@
     }
 
     function renderMissions() {
-      const list = ACC.MISSIONS[week] || [];
+      const list = (ACC.MISSIONS[week] || []).map((m) => {
+        if (m.id === "M01" && (user.completed || []).includes("M01")) {
+          return { ...m, status: "completed" };
+        }
+        return m;
+      });
       grid.innerHTML = list
         .map((m) => {
           const locked = m.status === "locked";
-          const href = locked ? "#" : `mission.html?id=${m.id}`;
+          const href = locked ? "#" : m.href || `mission.html?id=${m.id}`;
           return `
         <a class="glass mission-card ${locked ? "locked" : ""}" href="${href}">
           <div class="meta">${statusBadge(m.status)}<span class="badge">${m.diff}</span></div>

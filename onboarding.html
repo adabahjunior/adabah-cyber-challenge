@@ -69,6 +69,11 @@
               </div>
             </div>
             <div class="field"><label for="username">Username</label><input id="username" required placeholder="ama_ops" pattern="[A-Za-z0-9_]{3,20}"></div>
+            <div class="field">
+              <label for="whatsapp">WhatsApp number</label>
+              <input id="whatsapp" type="tel" required inputmode="tel" autocomplete="tel" placeholder="+233 24 000 0000" pattern="^\+?[0-9\s\-()]{9,20}$">
+              <span class="field-hint">Must be an active WhatsApp number we can reach you on (include country code).</span>
+            </div>
             <div class="field"><label for="password">Password</label><input id="password" type="password" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password"></div>
             <p class="field-hint" id="profileError" style="color:var(--red-bright);min-height:1.2em"></p>
             <div class="row">
@@ -159,10 +164,11 @@
       </div>
     </main>
   </div>
-  <script src="js/core.js"></script>
-  <script src="js/selects.js"></script>
-  <script src="js/avatars.js"></script>
-  <script src="js/supabase-auth.js"></script>
-  <script src="js/onboarding.js"></script>
+  <script src="js/core.js?v=5"></script>
+  <script src="js/selects.js?v=5"></script>
+  <script src="js/avatars.js?v=5"></script>
+  <script src="js/password.js?v=5"></script>
+  <script src="js/supabase-auth.js?v=5"></script>
+  <script src="js/onboarding.js?v=5"></script>
 </body>
 </html>

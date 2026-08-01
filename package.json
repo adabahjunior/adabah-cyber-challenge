@@ -2,7 +2,13 @@
   "name": "adabah-cyber-challenge",
   "private": true,
   "scripts": {
-    "start": "python -m http.server 5500"
+    "build": "npm --prefix mission-room run build",
+    "start": "python -m http.server 5500",
+    "mission:dev": "npm --prefix mission-room run dev",
+    "mission:build": "npm --prefix mission-room run build"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
     "supabase": "^2.111.0"

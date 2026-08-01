@@ -119,7 +119,14 @@
     draft.department = document.getElementById("department").value;
     draft.level = document.getElementById("level").value;
     draft.username = document.getElementById("username").value.trim();
+    draft.whatsapp = document.getElementById("whatsapp").value.trim().replace(/\s+/g, " ");
     accountPassword = document.getElementById("password").value;
+
+    const digits = draft.whatsapp.replace(/[^\d]/g, "");
+    if (digits.length < 9) {
+      err.textContent = "Enter a valid active WhatsApp number (with country code).";
+      return;
+    }
     ACC.saveUser(draft);
 
     btn.disabled = true;
@@ -181,6 +188,7 @@
         avatar: avatarStyle,
         avatarStyle,
         portraitUrl,
+        whatsapp: draft.whatsapp,
       });
       draft.portraitUrl = portraitUrl;
       draft.avatarStyle = avatarStyle;
@@ -197,6 +205,7 @@
   if (draft.fullName) document.getElementById("fullName").value = draft.fullName;
   if (draft.email) document.getElementById("email").value = draft.email;
   if (draft.username) document.getElementById("username").value = draft.username;
+  if (draft.whatsapp) document.getElementById("whatsapp").value = draft.whatsapp;
 
   (async () => {
     try {
@@ -210,6 +219,7 @@
         if (draft.fullName) document.getElementById("fullName").value = draft.fullName;
         if (draft.email) document.getElementById("email").value = draft.email;
         if (draft.username) document.getElementById("username").value = draft.username;
+        if (draft.whatsapp) document.getElementById("whatsapp").value = draft.whatsapp;
         if (draft.portraitUrl) {
           portraitPreviewUrl = draft.portraitUrl;
           showPortraitPreview(portraitPreviewUrl);

@@ -1,0 +1,10 @@
+node_modules
+mission-room/node_modules
+.supabase
+supabase/.temp
+.env
+.env.local
+*.log
+.git
+README.md
+scripts

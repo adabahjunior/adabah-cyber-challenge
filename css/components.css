@@ -344,6 +344,41 @@
   color: var(--text-dim);
 }
 
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 4.5rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 32px;
+  padding: 0 0.7rem;
+  border-radius: 6px;
+  border: 1px solid rgba(176, 0, 32, 0.35);
+  background: rgba(176, 0, 32, 0.12);
+  color: var(--red-bright);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  background: var(--red-dim);
+  border-color: var(--red);
+}
+
 /* Badges */
 .badge {
   display: inline-flex;

@@ -1,4 +1,4 @@
-# ADABAH Cyber Challenge — Supabase Auth client
+// ADABAH Cyber Challenge — Supabase Auth client
 
 const SUPABASE_URL = "https://zxxhkhnqcilqktmyblhf.supabase.co";
 const SUPABASE_ANON_KEY =
@@ -59,6 +59,7 @@ function profileToLocal(profile, session) {
     fullName: profile?.full_name || "",
     email: profile?.email || session?.user?.email || "",
     department: profile?.department || "",
+    whatsapp: profile?.whatsapp || "",
     level: profile?.level || "Beginner",
     username: profile?.username || "",
     hackerName: profile?.hacker_name || profile?.username || "",
@@ -140,6 +141,7 @@ async function completeOnboarding(payload) {
     p_avatar: payload.avatar || payload.avatarStyle || "pulse",
     p_portrait_url: payload.portraitUrl,
     p_avatar_style: payload.avatarStyle || payload.avatar || "pulse",
+    p_whatsapp: payload.whatsapp,
   });
   if (error) throw error;
   await syncLocalFromCloud();
@@ -158,6 +160,11 @@ async function requireCloudAuth() {
     return null;
   }
   return synced;
+}
+
+// Guard: core helpers must exist before auth helpers run
+if (typeof window.ACC === "undefined") {
+  console.warn("ACC core missing — load js/core.js before js/supabase-auth.js");
 }
 
 window.ACCAuth = {

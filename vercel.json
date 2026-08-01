@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm --prefix mission-room install",
+  "buildCommand": "npm --prefix mission-room run build",
+  "cleanUrls": true,
+  "trailingSlash": false
+}

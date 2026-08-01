@@ -1,0 +1,92 @@
+export const MISSION_001 = {
+  id: "M01",
+  caseNumber: "ACC-001",
+  title: "THE PHISHING TRAP",
+  shortTitle: "MISSION 001",
+  category: "Social Engineering",
+  difficulty: "Beginner",
+  points: 100,
+  timeLimitSec: 45 * 60,
+  caseFile: {
+    heading: "CASE FILE: THE PHISHING TRAP",
+    intro:
+      "A UMaT student reported suspicious activity after receiving an email claiming to be from the university IT department. The student clicked a link and entered personal information. Your mission is to investigate the evidence, identify the attack, and recommend security actions.",
+  },
+  evidence: [
+    {
+      id: "E001",
+      title: "EMAIL RECEIVED",
+      type: "email",
+    },
+    {
+      id: "E002",
+      title: "WEBSITE SNAPSHOT",
+      type: "website",
+    },
+    {
+      id: "E003",
+      title: "EMAIL HEADERS",
+      type: "headers",
+    },
+  ],
+  tasks: [
+    {
+      id: "T1",
+      title: "Identify The Attack",
+      points: 20,
+      kind: "single",
+      prompt: "What type of cyber attack occurred?",
+      options: [
+        "Malware Attack",
+        "Phishing Attack",
+        "Denial of Service Attack",
+        "Password Spraying Attack",
+      ],
+      correct: "Phishing Attack",
+    },
+    {
+      id: "T2",
+      title: "Find The Red Flags",
+      points: 30,
+      kind: "multi",
+      prompt: "Select every warning sign you can find.",
+      options: [
+        "Urgent language",
+        "Suspicious domain",
+        "Unknown reply address",
+        "Requests password",
+        "Poor verification process",
+      ],
+      correct: [
+        "Urgent language",
+        "Suspicious domain",
+        "Unknown reply address",
+        "Requests password",
+        "Poor verification process",
+      ],
+    },
+    {
+      id: "T3",
+      title: "Website Analysis",
+      points: 25,
+      kind: "text",
+      prompt: "Provide three reasons why this website should not be trusted.",
+      minReasons: 3,
+    },
+    {
+      id: "T4",
+      title: "Cyber Advisor",
+      points: 25,
+      kind: "essay",
+      prompt: "Your friend receives this email. What should they do?",
+      maxWords: 150,
+      minWords: 20,
+    },
+  ],
+  skills: [
+    "Phishing detection",
+    "Email analysis",
+    "Social engineering awareness",
+    "Cyber investigation thinking",
+  ],
+};
