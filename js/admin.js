@@ -234,6 +234,49 @@
     }
   });
 
+  async function refreshAccessHold() {
+    const status = document.getElementById("accessHoldStatus");
+    const btn = document.getElementById("accessHoldToggle");
+    const msg = document.getElementById("accessHoldMsg");
+    if (!status || !btn) return;
+    try {
+      const active = await ACCAuth.isAccessHoldActive();
+      status.textContent = active ? "ACTIVE — students held on waiting page" : "INACTIVE — students can enter the platform";
+      status.style.color = active ? "var(--red-bright)" : "#86efac";
+      btn.textContent = active ? "Deactivate gate" : "Activate gate";
+      btn.dataset.active = active ? "1" : "0";
+      btn.className = active ? "btn btn-ghost" : "btn btn-primary";
+      if (msg && !msg.dataset.locked) msg.textContent = "";
+    } catch (err) {
+      status.textContent = "Could not load gate status";
+      if (msg) msg.textContent = err.message || "Error";
+    }
+  }
+
+  document.getElementById("accessHoldToggle")?.addEventListener("click", async () => {
+    const btn = document.getElementById("accessHoldToggle");
+    const msg = document.getElementById("accessHoldMsg");
+    const currentlyActive = btn.dataset.active === "1";
+    btn.disabled = true;
+    try {
+      await ACCAuth.setAccessHoldActive(!currentlyActive);
+      if (msg) {
+        msg.dataset.locked = "1";
+        msg.textContent = !currentlyActive
+          ? "Gate activated. New signups and student logins will see the WhatsApp waiting page."
+          : "Gate deactivated. Students can reach the dashboard and challenges again.";
+        setTimeout(() => {
+          delete msg.dataset.locked;
+        }, 50);
+      }
+      await refreshAccessHold();
+    } catch (err) {
+      if (msg) msg.textContent = err.message || "Could not update gate.";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
   (async () => {
     const gate = await ACCAuth.requireAdmin();
     if (!gate) return;
@@ -250,6 +293,7 @@
     renderLeaderboard(rows);
     renderSubmissionsEmpty();
     await refreshMissions();
+    await refreshAccessHold();
   })().catch((err) => {
     console.error(err);
     location.href = "dashboard.html";

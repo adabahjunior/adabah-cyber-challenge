@@ -355,7 +355,55 @@ async function completeOnboarding(payload) {
   return data;
 }
 
-async function requireCloudAuth() {
+async function isAccessHoldActive() {
+  try {
+    const supabase = await getClient();
+    const { data, error } = await supabase
+      .from("acc_settings")
+      .select("value")
+      .eq("key", "access_hold")
+      .maybeSingle();
+    if (error) {
+      console.warn("access_hold setting unavailable", error.message);
+      return true;
+    }
+    if (!data) return true;
+    return Boolean(data.value?.active);
+  } catch (err) {
+    console.warn(err);
+    return true;
+  }
+}
+
+async function setAccessHoldActive(active) {
+  if (!(await isAdmin())) throw new Error("Admin access required");
+  const supabase = await getClient();
+  const { data, error } = await supabase
+    .from("acc_settings")
+    .upsert(
+      {
+        key: "access_hold",
+        value: { active: Boolean(active) },
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "key" }
+    )
+    .select("value")
+    .single();
+  if (error) throw error;
+  return Boolean(data.value?.active);
+}
+
+async function resolvePostAuthPath(synced) {
+  if (!synced?.session) return "login.html";
+  if (!synced.local?.onboarded) return "onboarding.html";
+  if (synced.local?.isAdmin || isAdminEmail(synced.session?.user?.email)) return "dashboard.html";
+  const hold = await isAccessHoldActive();
+  return hold ? "pending.html" : "dashboard.html";
+}
+
+async function requireCloudAuth(options = {}) {
+  const { allowHoldPage = false } = options;
   const session = await getSession();
   if (!session) {
     location.href = "login.html";
@@ -366,6 +414,16 @@ async function requireCloudAuth() {
     location.href = "onboarding.html";
     return null;
   }
+
+  const admin = synced.local?.isAdmin || isAdminEmail(synced.session?.user?.email);
+  if (!admin) {
+    const hold = await isAccessHoldActive();
+    if (hold && !allowHoldPage) {
+      location.href = "pending.html";
+      return null;
+    }
+  }
+
   return synced;
 }
 
@@ -390,6 +448,9 @@ window.ACCAuth = {
   requireAdmin,
   isAdmin,
   isAdminEmail,
+  isAccessHoldActive,
+  setAccessHoldActive,
+  resolvePostAuthPath,
   listParticipants,
   listLeaderboard,
   listMissions,

@@ -17,6 +17,7 @@ export default defineConfig({
         leaderboard: resolve(__dirname, "leaderboard.html"),
         profile: resolve(__dirname, "profile.html"),
         admin: resolve(__dirname, "admin.html"),
+        pending: resolve(__dirname, "pending.html"),
         mission001: resolve(__dirname, "mission-001/index.html"),
         mission002: resolve(__dirname, "mission-002/index.html"),
         challenges: resolve(__dirname, "challenges.html"),

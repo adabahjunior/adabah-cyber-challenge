@@ -78,7 +78,7 @@
         const session = await ACCAuth.getSession();
         if (session) {
           const synced = await ACCAuth.syncLocalFromCloud();
-          location.replace(synced?.local?.onboarded ? "dashboard.html" : "onboarding.html");
+          location.replace(await ACCAuth.resolvePostAuthPath(synced));
         }
       } catch (_) {}
     })();
@@ -96,7 +96,7 @@
           password: document.getElementById("password").value,
         });
         const synced = await ACCAuth.syncLocalFromCloud();
-        location.href = synced?.local?.onboarded ? "dashboard.html" : "onboarding.html";
+        location.href = await ACCAuth.resolvePostAuthPath(synced);
       } catch (ex) {
         err.textContent = ex.message || "Sign in failed";
         btn.disabled = false;

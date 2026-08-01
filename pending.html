@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registration received | ADABAH Cyber Challenge</title>
+  <link rel="icon" href="/assets/logo.svg">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+</head>
+<body>
+  <div class="cyber-grid" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="page">
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="index.html">
+          <span class="brand-mark">ACC</span>
+          ADABAH <span class="acc">Cyber Challenge</span>
+        </a>
+        <nav class="nav-links" data-nav-links>
+          <button class="btn btn-ghost btn-sm" type="button" id="signOutBtn">Sign out</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="section" style="padding-top:3rem">
+      <div class="container" style="max-width:640px">
+        <div class="glass panel-lg glass-red" style="padding:1.75rem 1.6rem">
+          <p class="eyebrow">Registration complete</p>
+          <h1 style="font-size:clamp(1.5rem,3vw,2rem)">You’re on the list</h1>
+          <p class="muted" style="margin-top:.85rem;line-height:1.65">
+            Thanks for joining ADABAH Cyber Challenge. An administrator will contact you on WhatsApp shortly to confirm your place.
+          </p>
+          <p class="muted" style="margin-top:.75rem;line-height:1.65">
+            Keep your phone nearby and watch for a message from the ACC team. Platform access opens after that confirmation.
+          </p>
+
+          <div class="glass panel" style="margin-top:1.35rem;padding:1rem 1.1rem">
+            <div class="mono dim" style="font-size:.72rem;letter-spacing:.08em">REGISTERED AS</div>
+            <div class="mono" style="margin-top:.35rem;font-size:1.05rem" id="pendingHandle">@student</div>
+            <div class="muted" style="margin-top:.25rem" id="pendingMeta">—</div>
+            <div class="mono" style="margin-top:.55rem;color:var(--red-bright)" id="pendingWhatsapp"></div>
+          </div>
+
+          <div class="terminal" style="margin-top:1.25rem">
+            <div class="terminal-bar">
+              <span class="terminal-dot red"></span>
+              <span class="terminal-dot"></span>
+              <span class="terminal-dot"></span>
+              <span class="mono dim" style="margin-left:.5rem;font-size:.75rem">ACC intake</span>
+            </div>
+            <div class="terminal-body" id="pendingTerm"></div>
+          </div>
+
+          <p class="mono dim" style="margin-top:1.15rem;font-size:.78rem">
+            You can’t open the dashboard while intake review is active.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div>ADABAH Cyber Challenge</div>
+        <div class="mono">cybercc.adabah.com</div>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="/js/core.js"></script>
+  <script type="module" src="/js/supabase-auth.js"></script>
+  <script type="module" src="/js/pending.js"></script>
+</body>
+</html>

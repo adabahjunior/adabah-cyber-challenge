@@ -41,11 +41,32 @@
 
         <div class="admin-tabs" id="adminTabs">
           <button class="admin-tab active" type="button" data-panel="participants">Participants</button>
+          <button class="admin-tab" type="button" data-panel="access">Access Gate</button>
           <button class="admin-tab" type="button" data-panel="missions">Missions</button>
           <button class="admin-tab" type="button" data-panel="leaderboard">Leaderboard</button>
           <button class="admin-tab" type="button" data-panel="files">Upload Files</button>
           <button class="admin-tab" type="button" data-panel="submissions">Submissions</button>
         </div>
+
+        <section class="admin-panel glass panel-lg" data-panel="access" hidden>
+          <p class="eyebrow">Signup & login gate</p>
+          <h2 style="font-size:1.15rem;margin-top:.35rem">Waiting room</h2>
+          <p class="muted" style="margin:.65rem 0 1rem;max-width:60ch">
+            When this gate is <strong>active</strong>, every new signup and every non-admin login stops on the waiting page
+            (“admin will contact you on WhatsApp”). Students cannot open the dashboard, challenges, or missions until you deactivate it.
+            Your admin account is never blocked.
+          </p>
+          <div class="glass panel" style="padding:1.1rem 1.2rem">
+            <div class="row" style="justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+              <div>
+                <div class="mono dim" style="font-size:.72rem;letter-spacing:.08em">GATE STATUS</div>
+                <div class="mono" style="font-size:1.2rem;margin-top:.35rem" id="accessHoldStatus">Checking…</div>
+              </div>
+              <button class="btn btn-primary" type="button" id="accessHoldToggle">Toggle gate</button>
+            </div>
+            <p class="field-hint" id="accessHoldMsg" style="margin-top:1rem"></p>
+          </div>
+        </section>
 
         <section class="admin-panel glass panel-lg" data-panel="participants">
           <p class="eyebrow">Registered students</p>

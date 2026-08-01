@@ -73,6 +73,20 @@
       ACCAvatars.mount(document.getElementById("finalAnim"), draft.avatarStyle || avatarStyle, "lg");
       document.getElementById("finalHandle").textContent = `@${draft.hackerName || draft.username}`;
       document.getElementById("finalMeta").textContent = `${draft.level} · ${draft.department || "Student"}`;
+      (async () => {
+        const cta = document.getElementById("finishCta");
+        if (!cta) return;
+        try {
+          const path = await ACCAuth.resolvePostAuthPath({
+            session: await ACCAuth.getSession(),
+            local: { ...draft, onboarded: true, isAdmin: ACCAuth.isAdminEmail(draft.email) },
+          });
+          cta.href = path;
+          cta.textContent = path.includes("pending") ? "Continue" : "Go to my dashboard";
+        } catch (_) {
+          cta.href = "pending.html";
+        }
+      })();
     }
   }
 
@@ -211,7 +225,7 @@
     try {
       const synced = await ACCAuth.syncLocalFromCloud();
       if (synced?.local?.onboarded) {
-        location.replace("dashboard.html");
+        location.replace(await ACCAuth.resolvePostAuthPath(synced));
         return;
       }
       if (synced?.session) {
