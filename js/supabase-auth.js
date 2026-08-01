@@ -294,7 +294,14 @@ async function updateMission(id, patch) {
     .eq("id", id)
     .select("*")
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    if (payload.week != null && /week|check/i.test(error.message || "")) {
+      throw new Error(
+        "This database still limits missions to Weeks 1–3. Run the latest acc_missions week migration in Supabase, then retry."
+      );
+    }
+    throw error;
+  }
   if (!data) {
     // Insert if missing (first-time seed)
     const base = DEFAULT_MISSIONS.find((m) => m.id === id) || {
@@ -326,14 +333,19 @@ async function ensureDefaultMissions() {
   const have = new Set((existing || []).map((m) => m.id));
   const missing = DEFAULT_MISSIONS.filter((m) => !have.has(m.id));
   if (!missing.length) return;
-  const { error } = await supabase.from("acc_missions").upsert(
-    missing.map((m) => ({
-      ...m,
-      updated_at: new Date().toISOString(),
-    })),
-    { onConflict: "id" }
-  );
-  if (error) console.warn("Could not seed default missions", error.message);
+
+  // Insert one-by-one so a single constraint failure cannot block the rest
+  for (const m of missing) {
+    const row = { ...m, updated_at: new Date().toISOString() };
+    let { error } = await supabase.from("acc_missions").upsert(row, { onConflict: "id" });
+    if (error && /week|check/i.test(error.message || "") && Number(m.week) > 3) {
+      // Older DBs only allow weeks 1–3 until migration runs
+      ({ error } = await supabase
+        .from("acc_missions")
+        .upsert({ ...row, week: 3 }, { onConflict: "id" }));
+    }
+    if (error) console.warn(`Could not seed mission ${m.id}`, error.message);
+  }
 }
 
 async function downloadPortraitAsJpg(url, filename = "portrait.jpg") {

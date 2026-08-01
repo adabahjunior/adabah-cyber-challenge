@@ -153,6 +153,7 @@
             <option value="1" ${Number(m.week) === 1 ? "selected" : ""}>Week 1</option>
             <option value="2" ${Number(m.week) === 2 ? "selected" : ""}>Week 2</option>
             <option value="3" ${Number(m.week) === 3 ? "selected" : ""}>Week 3</option>
+            <option value="4" ${Number(m.week) === 4 ? "selected" : ""}>Week 4</option>
           </select>
         </td>
         <td>
@@ -168,11 +169,20 @@
   }
 
   async function refreshMissions() {
-    await ACCAuth.ensureDefaultMissions().catch(() => {});
+    const msg = document.getElementById("missionMsg");
+    await ACCAuth.ensureDefaultMissions().catch((err) => {
+      if (msg) msg.textContent = err.message || "Could not sync mission catalog.";
+    });
     const missions = await ACCAuth.listMissions({ includeInactive: true });
     renderMissions(missions);
     const live = missions.filter((m) => m.active).length;
     document.getElementById("statLiveMissions").textContent = String(live);
+    if (msg && missions.length < 9) {
+      msg.textContent =
+        `Catalog shows ${missions.length}/9 missions. If rows are missing, run the latest Supabase migration (expand weeks + seed M04–M09), then refresh.`;
+    } else if (msg && !msg.textContent) {
+      msg.textContent = `Mission catalog synced · ${missions.length} missions.`;
+    }
     return missions;
   }
 
